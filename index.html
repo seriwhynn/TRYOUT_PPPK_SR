@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>CAT Try Out - Wali Asuh Sekolah Rakyat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --blue:#1565c0; --blue-dark:#0d47a1; --green:#2e7d32; --yellow:#f9a825;
+    --gray:#eef1f5; --border:#d6dce5; --red:#c62828;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#dfe6ee;color:#222;}
+  .topbar{background:linear-gradient(90deg,var(--blue-dark),var(--blue));color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;}
+  .topbar .brand .logo{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--blue-dark);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;}
+  .topbar h1{font-size:15px;margin:0;}
+  .topbar small{opacity:.85;}
+  #timer{background:#fff;color:var(--blue-dark);font-weight:bold;padding:6px 14px;border-radius:6px;font-size:16px;letter-spacing:2px;font-variant-numeric:tabular-nums;min-width:90px;text-align:center;}
+  #timer.warn{color:var(--red);animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:.5;}}
+  .wrap{max-width:1180px;margin:18px auto;padding:0 14px;display:grid;grid-template-columns:1fr 300px;gap:16px;}
+  .panel{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+  .panel-header{background:var(--blue);color:#fff;padding:10px 16px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;font-size:13px;font-weight:bold;}
+  .soal-body{padding:20px;}
+  .soal-text{font-size:15px;line-height:1.7;margin-bottom:18px;white-space:pre-line;}
+  .opsi{display:flex;gap:10px;padding:10px 8px;border-radius:6px;cursor:pointer;margin-bottom:6px;border:1px solid transparent;transition:background .15s;}
+  .opsi:hover{background:#f3f6fb;}
+  .opsi.selected{background:#e3f1ff;border-color:var(--blue);}
+  .opsi .huruf{width:26px;height:26px;border-radius:50%;border:1px solid #999;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;font-weight:bold;}
+  .opsi.selected .huruf{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .opsi-text{font-size:14px;line-height:1.5;}
+  .footer-btns{display:flex;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);}
+  button{cursor:pointer;border:none;border-radius:6px;font-size:13px;font-weight:bold;padding:10px 18px;}
+  .btn-prev{background:#e0e0e0;color:#444;}
+  .btn-ragu{background:var(--yellow);color:#fff;}
+  .btn-next{background:var(--green);color:#fff;}
+  .btn-prev:disabled{opacity:.4;cursor:not-allowed;}
+  .info-box{padding:14px 16px;font-size:13px;line-height:1.8;}
+  .info-box b{display:inline-block;width:75px;}
+  .nav-soal{padding:12px 16px;}
+  .nav-title{font-size:12px;font-weight:bold;color:#555;margin-bottom:8px;}
+  .nav-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:320px;overflow-y:auto;padding-right:4px;}
+  .nav-grid div{aspect-ratio:1;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;background:#fff;transition:background .1s;}
+  .nav-grid div.active{border:2px solid var(--blue);font-weight:bold;color:var(--blue);}
+  .nav-grid div.answered{background:var(--green);color:#fff;border-color:var(--green);}
+  .nav-grid div.ragu{background:var(--yellow);color:#fff;border-color:var(--yellow);}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-top:10px;color:#555;}
+  .legend span{display:flex;align-items:center;gap:4px;}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--border);}
+  .legend .a{background:var(--green);} .legend .r{background:var(--yellow);} .legend .b{background:#fff;}
+  .sesi-tabs{display:flex;gap:6px;padding:10px 16px 0;flex-wrap:wrap;}
+  .sesi-tabs button{background:#f0f3f8;color:#333;font-size:12px;padding:8px 14px;border-radius:6px 6px 0 0;}
+  .sesi-tabs button.active{background:var(--blue);color:#fff;}
+  .submit-final{width:100%;background:var(--red);color:#fff;margin-top:10px;padding:12px;font-size:13px;}
+  .start-screen{max-width:680px;margin:60px auto;background:#fff;border-radius:10px;padding:34px;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+  .start-screen h2{color:var(--blue-dark);margin-top:0;}
+  .start-screen ul{line-height:1.9;font-size:14px;}
+  .start-screen button{background:var(--green);color:#fff;font-size:15px;padding:13px 26px;margin-top:10px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0;}
+  .stat-box{background:var(--gray);border-radius:8px;padding:12px;text-align:center;}
+  .stat-box .n{font-size:24px;font-weight:bold;color:var(--blue-dark);}
+  .stat-box small{font-size:11px;color:#666;}
+  .result-screen{max-width:820px;margin:40px auto;background:#fff;border-radius:10px;padding:30px;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+  .score-card{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0;}
+  .score-box{background:var(--gray);border-radius:8px;padding:16px;text-align:center;}
+  .score-box h3{margin:0 0 6px;font-size:12px;color:#555;}
+  .score-box .num{font-size:24px;font-weight:bold;color:var(--blue-dark);}
+  .score-box .pct{font-size:12px;color:#888;}
+  .review-item{border-bottom:1px solid var(--border);padding:14px 0;}
+  .review-item .tag{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;}
+  .tag.benar{background:var(--green);} .tag.salah{background:var(--red);} .tag.kosong{background:#999;}
+  .pembahasan{background:#f7f9fc;border-left:3px solid var(--blue);padding:10px 12px;margin-top:8px;font-size:13px;border-radius:4px;line-height:1.6;}
+  .hidden{display:none !important;}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr;}.score-card{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">CAT</div>
+    <div>
+      <h1>COMPUTER ASSISTED TEST</h1>
+      <small>Simulasi Try Out PPPK Tendik Sekolah Rakyat — Formasi Wali Asuh</small>
+    </div>
+  </div>
+  <div id="timer">02:10:00</div>
+</div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="startScreen">
+  <div style="text-align: center;">
+<h2>Try Out CAT Penata Layanan Operasional (Wali Asuh)</h2>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="n">145</div><small>Total Soal</small></div>
+    <div class="stat-box"><div class="n">02:10:00</div><small>Waktu Pengerjaan</small></div>
+    <div class="stat-box"><div class="n">90</div><small>Soal Teknis</small></div>
+    <div class="stat-box"><div class="n">25</div><small>Soal Manajerial</small></div>
+    <div class="stat-box"><div class="n">20</div><small>Soal Sosial Kultural</small></div>
+    <div class="stat-box"><div class="n">10</div><small>Soal Wawancara</small></div>
+  </div>
+  <p style="font-size:12px;color:#777;margin-top:10px;">Catatan: Soal disusun semirip mungkin dengan pola kisi-kisi resmi. Bank soal asli BKN tidak dipublikasikan ke publik sehingga tidak ada jaminan "pasti keluar".</p>
+  <button onclick="startTest()">▶ Mulai Try Out</button>
+</div>
+
+<!-- TEST SCREEN -->
+<div class="wrap hidden" id="testScreen">
+  <div class="panel">
+    <div class="panel-header">
+      <span id="soalLabel">SOAL NO. 1</span>
+      <span id="kategoriLabel" style="background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;">TEKNIS</span>
+    </div>
+    <div class="sesi-tabs" id="sesiTabs"></div>
+    <div class="soal-body">
+      <div class="soal-text" id="soalText"></div>
+      <div id="opsiContainer"></div>
+    </div>
+    <div class="footer-btns">
+      <button class="btn-prev" id="btnPrev" onclick="goPrev()">‹ SEBELUMNYA</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-ragu" id="btnRagu" onclick="toggleRagu()">⚑ RAGU-RAGU</button>
+        <button class="btn-next" onclick="goNext()">SIMPAN & LANJUTKAN ›</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <div class="panel-header"><span>INFORMASI PESERTA</span></div>
+      <div class="info-box">
+        <div><b>Nama</b>: Peserta Try Out</div>
+        <div><b>Formasi</b>: Wali Asuh — Sekolah Rakyat</div>
+        <div><b>Instansi</b>: Kementerian Sosial RI</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px;">
+      <div class="panel-header"><span>NAVIGASI SOAL</span></div>
+      <div class="nav-soal">
+        <div class="nav-grid" id="navGrid"></div>
+        <div class="legend">
+          <span><i class="a"></i>Terjawab</span>
+          <span><i class="r"></i>Ragu-ragu</span>
+          <span><i class="b"></i>Belum</span>
+        </div>
+        <button class="submit-final" onclick="confirmFinish()">✔ SELESAI &amp; KUMPULKAN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="result-screen hidden" id="resultScreen">
+  <h2 style="color:var(--blue-dark);margin-top:0;">📊 Hasil Try Out</h2>
+  <div class="score-card" id="scoreCard"></div>
+  <h3>Pembahasan &amp; Review Jawaban</h3>
+  <div id="reviewList"></div>
+  <button onclick="location.reload()" style="background:var(--blue);color:#fff;margin-top:18px;padding:12px 24px;font-size:14px;">↺ Ulangi Try Out</button>
+</div>
+
+<script>
+/* =====================================================================
+   BANK SOAL — 145 Soal
+   90 Teknis | 25 Manajerial | 20 Sosial Kultural | 10 Wawancara
+   ===================================================================== */
+
+const bank = {
+
+/* ============================
+   TEKNIS — 90 SOAL
+   ============================ */
+teknis: [
+  {q:"Seorang murid baru tiba di asrama Sekolah Rakyat dengan membawa tas berisi pakaian seadanya dan tampak menarik diri dari teman-teman lainnya. Sebagai Wali Asuh, langkah paling tepat pada hari pertama adalah...",
+   o:["Menempatkan murid langsung ke jadwal kegiatan asrama seperti murid lainnya","Melakukan asesmen awal kondisi fisik, emosional, dan kebutuhan dasar murid","Menugaskan teman sekamar untuk mengajak murid berbaur segera","Meminta murid menceritakan latar belakang keluarganya secara rinci","Mencatat identitas murid lalu menyerahkan pendampingan ke petugas piket"],
+   a:1,p:"Asesmen awal kondisi murid menjadi dasar penting agar pendekatan pengasuhan yang diberikan sesuai dengan kebutuhan riil, bukan asumsi."},
+
+  {q:"Dalam proses orientasi murid baru, Wali Asuh menemukan bahwa beberapa murid berasal dari latar belakang keluarga rentan secara ekonomi dan sosial. Pendekatan pengasuhan yang paling tepat diterapkan adalah...",
+   o:["Memberi perhatian ekstra secara terbuka agar murid merasa istimewa","Menyusun pendekatan pengasuhan yang peka terhadap kondisi dan riwayat masing-masing murid","Menyamakan seluruh program tanpa membedakan kondisi asal murid","Menunjuk murid senior untuk mendampingi tanpa arahan khusus","Mencatat kondisi murid untuk dilaporkan pada evaluasi akhir semester"],
+   a:1,p:"Pengasuhan yang efektif mempertimbangkan latar belakang individual murid agar layanan benar-benar tepat sasaran."},
+
+  {q:"Wali Asuh mendapati seorang murid sering terlambat mengikuti kegiatan pagi asrama selama beberapa hari berturut-turut. Sebelum memberikan sanksi, tindakan paling tepat adalah...",
+   o:["Mencatat pelanggaran sebagai bahan evaluasi tata tertib bulanan","Menelusuri penyebab keterlambatan melalui pendekatan personal terlebih dahulu","Meminta teman sekamar membangunkan murid setiap pagi","Menetapkan masa percobaan sebelum sanksi resmi dijatuhkan","Menyampaikan peringatan lisan di hadapan seluruh penghuni asrama"],
+   a:1,p:"Menelusuri akar masalah terlebih dahulu adalah langkah HOTS yang menghindari kesalahan penanganan akibat asumsi semata."},
+
+  {q:"Seorang murid menunjukkan perubahan drastis dalam pola makan dan tidur selama dua minggu terakhir. Wali Asuh perlu menentukan langkah pendampingan yang tepat. Urutan langkah paling logis adalah...",
+   o:["Menanyakan langsung penyebabnya lalu menutup kasus bila murid diam","Melakukan observasi mendalam, mendokumentasikan perubahan, lalu berkoordinasi dengan pihak terkait bila perlu","Memberi waktu istirahat tambahan tanpa mencatat perkembangannya","Menyesuaikan porsi makan murid berdasarkan asumsi awal","Menunggu laporan dari teman sekamar sebelum bertindak"],
+   a:1,p:"Observasi sistematis dan dokumentasi menjadi dasar pengambilan keputusan pendampingan yang akurat dan dapat dipertanggungjawabkan."},
+
+  {q:"Dalam menyusun rencana pendampingan individual, Wali Asuh perlu mempertimbangkan data perkembangan murid dari berbagai sumber. Sumber data yang paling relevan untuk dijadikan dasar adalah...",
+   o:["Kesan pribadi Wali Asuh selama interaksi sehari-hari","Hasil observasi harian, catatan akademik, dan informasi dari wali kelas atau orang tua","Penilaian dari murid lain mengenai perilaku temannya","Mencatat kehadiran murid sebagai dasar laporan kegiatan asrama","Hasil wawancara singkat pada awal masa orientasi"],
+   a:1,p:"Data yang valid dan terverifikasi dari berbagai sumber resmi menjadi dasar penyusunan rencana pendampingan yang objektif."},
+
+  {q:"Seorang murid menolak mengikuti kegiatan pembinaan karakter dengan alasan merasa tidak nyaman di lingkungan kelompok. Pendekatan yang paling tepat dilakukan Wali Asuh adalah...",
+   o:["Menjadwalkan ulang kegiatan agar murid dapat menyesuaikan waktu","Menggali penyebab ketidaknyamanan dan menyesuaikan pendekatan secara bertahap","Mengizinkan murid memilih kegiatan pengganti sesuai keinginannya","Meminta ketua kelompok membujuk murid agar mau bergabung","Menunda keikutsertaan murid hingga kegiatan berikutnya"],
+   a:1,p:"Pendampingan yang efektif menyesuaikan strategi dengan kondisi psikologis murid agar partisipasi tumbuh secara alami."},
+
+  {q:"Wali Asuh menemukan bahwa kebutuhan pengasuhan murid laki-laki dan perempuan di asrama memiliki perbedaan signifikan terkait aspek psikososial. Langkah paling tepat dalam menyusun program pengasuhan adalah...",
+   o:["Menyusun satu program umum yang fleksibel bagi seluruh murid","Menyusun program yang responsif terhadap kebutuhan spesifik masing-masing kelompok","Memprioritaskan program untuk kelompok yang lebih banyak jumlahnya","Menugaskan pendamping berbeda tanpa menyesuaikan materi program","Menyerahkan penyusunan program sepenuhnya kepada murid senior"],
+   a:1,p:"Program pengasuhan yang responsif gender memastikan kebutuhan spesifik setiap kelompok murid terpenuhi secara tepat."},
+
+  {q:"Pada masa adaptasi awal, beberapa murid menunjukkan gejala kerinduan rumah (homesick) yang cukup berat. Strategi pendampingan paling efektif yang dapat diterapkan Wali Asuh adalah...",
+   o:["Mengalihkan perhatian murid dengan memperbanyak jadwal kegiatan asrama","Memfasilitasi komunikasi terjadwal dengan keluarga sambil membangun ikatan sosial di asrama","Menyarankan murid menahan diri agar cepat terbiasa","Mempertemukan murid dengan keluarga sesegera mungkin di asrama","Menugaskan murid senior untuk terus menemani sepanjang hari"],
+   a:1,p:"Keseimbangan antara menjaga ikatan keluarga dan membangun keterikatan baru di asrama membantu murid beradaptasi secara sehat."},
+
+  {q:"Seorang murid menunjukkan potensi bakat tertentu namun kurang percaya diri untuk menampilkannya. Pendekatan pengasuhan yang paling tepat untuk mengembangkan potensi tersebut adalah...",
+   o:["Mendaftarkan murid pada perlombaan agar terlatih tampil","Memberikan ruang dan dukungan bertahap agar kepercayaan diri murid tumbuh secara alami","Meminta murid berlatih tampil di depan kelompok besar sesegera mungkin","Menunjuk murid lain sebagai contoh agar termotivasi","Membuat jadwal latihan mandiri tanpa pendampingan langsung"],
+   a:1,p:"Pengembangan potensi murid memerlukan pendekatan bertahap yang membangun rasa aman dan percaya diri."},
+
+  {q:"Dalam proses pengasuhan, Wali Asuh dihadapkan pada murid yang menunjukkan kemandirian rendah dalam mengurus kebutuhan pribadi sehari-hari. Strategi paling tepat untuk membangun kemandirian murid adalah...",
+   o:["Menetapkan target harian yang harus dicapai murid secara mandiri","Membimbing secara bertahap dengan memberikan tanggung jawab sesuai kemampuan murid","Meminta teman sekamar membantu menyelesaikan kebutuhan pribadinya","Membuat daftar tugas rutin yang harus diikuti tanpa pendampingan","Melibatkan orang tua untuk mengingatkan murid dari jarak jauh"],
+   a:1,p:"Kemandirian dibangun melalui bimbingan bertahap yang memberi ruang murid belajar mengurus dirinya sendiri."},
+  {q:"Wali Asuh menyusun jadwal pembinaan karakter mingguan, namun menemukan tingkat partisipasi murid menurun pada minggu ketiga. Langkah evaluatif paling tepat adalah...",
+   o:["Mengganti jam pelaksanaan kegiatan ke waktu yang lebih longgar","Menganalisis penyebab penurunan partisipasi dan menyesuaikan metode pembinaan","Menambah variasi hadiah agar murid lebih tertarik hadir","Mewajibkan kehadiran dengan mencatat murid yang absen","Memindahkan materi pembinaan ke sesi yang lebih singkat"],
+   a:1,p:"Evaluasi berbasis penyebab memungkinkan penyesuaian program yang lebih tepat sasaran dibanding tindakan reaktif."},
+
+  {q:"Seorang murid secara konsisten menunjukkan sikap menarik diri saat kegiatan kelompok berlangsung. Untuk memahami akar masalah secara komprehensif, Wali Asuh sebaiknya...",
+   o:["Mengamati pola perilaku murid dalam berbagai situasi dan berdiskusi secara personal","Menempatkan murid pada kelompok kecil agar lebih mudah beradaptasi","Menanyakan langsung kepada teman sekamar tentang kebiasaan murid","Memberikan peran khusus dalam kelompok agar murid lebih terlibat","Menyarankan murid mengikuti konseling kelompok secara rutin"],
+   a:0,p:"Observasi menyeluruh dan pendekatan personal diperlukan sebelum menarik kesimpulan tentang kondisi murid."},
+
+  {q:"Aspek paling penting yang harus diperhatikan Wali Asuh ketika menyusun program pembinaan karakter berbasis kebutuhan murid adalah...",
+   o:["Kesesuaian program dengan kebutuhan dan karakteristik murid yang teridentifikasi","Ketersediaan waktu pelaksanaan di sela jadwal akademik","Variasi metode agar kegiatan tidak terasa monoton","Dukungan sarana dan prasarana yang dimiliki asrama","Keterlibatan seluruh murid tanpa terkecuali dalam setiap sesi"],
+   a:0,p:"Program pembinaan yang efektif harus selaras dengan kebutuhan riil murid, bukan sekadar kuantitas kegiatan."},
+
+  {q:"Dalam pelaksanaan kegiatan pembinaan disiplin asrama, seorang murid berulang kali melanggar aturan meski telah diberi peringatan. Pendekatan paling tepat untuk kasus ini adalah...",
+   o:["Menetapkan konsekuensi yang lebih tegas dari peringatan sebelumnya","Melakukan pendekatan konseling untuk memahami akar penyebab pelanggaran berulang","Meminta wali kelas turun tangan menangani kasus tersebut","Menempatkan murid pada pengawasan lebih ketat selama sepekan","Menyampaikan pelanggaran kepada orang tua sebagai bentuk teguran"],
+   a:1,p:"Pelanggaran berulang sering mengindikasikan masalah mendasar yang memerlukan pendekatan konseling, bukan sekadar sanksi."},
+
+  {q:"Ketika menyusun rencana kegiatan pembinaan karakter mingguan, Wali Asuh sebaiknya melibatkan...",
+   o:["Murid senior sebagai fasilitator utama kegiatan","Murid, wali kelas, dan pihak terkait lainnya secara kolaboratif","Petugas kebersihan asrama untuk aspek teknis pelaksanaan","Kepala Sekolah dalam setiap tahap penyusunan rencana","Orang tua murid sebagai penentu utama materi kegiatan"],
+   a:1,p:"Pendekatan kolaboratif melibatkan berbagai pihak relevan memastikan program pembinaan lebih komprehensif dan terkoordinasi."},
+
+  {q:"Murid yang berasal dari daerah dengan budaya berbeda menunjukkan kesulitan menyesuaikan diri dengan norma asrama. Pendekatan pengasuhan yang paling tepat adalah...",
+   o:["Menugaskan murid dari daerah yang sama untuk mendampingi penuh","Memberikan pemahaman bertahap disertai apresiasi terhadap latar belakang budaya murid","Menyusun aturan khusus bagi murid dengan latar budaya berbeda","Mengizinkan murid menjalankan kebiasaan lamanya di dalam asrama","Menjelaskan aturan asrama secara tertulis tanpa pendampingan lanjutan"],
+   a:1,p:"Pendekatan yang menghargai keberagaman budaya membantu murid beradaptasi tanpa kehilangan identitasnya."},
+
+  {q:"Wali Asuh mengamati adanya kelompok kecil murid yang cenderung eksklusif dan jarang berinteraksi dengan murid lain. Langkah pembinaan paling tepat untuk mendorong interaksi sosial yang lebih luas adalah...",
+   o:["Mengatur ulang penempatan kamar agar kelompok tersebut terpisah","Merancang kegiatan kelompok campuran yang mendorong interaksi alami antarmurid","Menegur kelompok tersebut agar lebih terbuka kepada murid lain","Menunjuk salah satu anggota kelompok sebagai penghubung sosial","Membatasi waktu berkumpul kelompok tersebut di luar jam belajar"],
+   a:1,p:"Kegiatan yang dirancang secara terstruktur dapat mendorong interaksi sosial tanpa kesan memaksa."},
+
+  {q:"Dalam evaluasi bulanan, Wali Asuh menemukan bahwa indikator kedisiplinan murid menurun dibanding bulan sebelumnya. Tindakan analitis paling tepat sebelum mengambil keputusan adalah...",
+   o:["Membandingkan data tersebut dengan asrama lain sebagai acuan","Menganalisis faktor penyebab penurunan melalui data dan observasi sebelum menentukan intervensi","Menetapkan kembali aturan disiplin yang telah ada sebelumnya","Mengingatkan seluruh murid tentang pentingnya kedisiplinan","Menjadwalkan sesi evaluasi bersama murid secara terbuka"],
+   a:1,p:"Keputusan intervensi yang tepat harus didasarkan pada analisis data dan faktor penyebab, bukan reaksi spontan."},
+
+  {q:"Seorang murid menunjukkan sikap agresif terhadap teman sekamarnya dalam beberapa kejadian terakhir. Langkah awal paling tepat yang harus dilakukan Wali Asuh adalah...",
+   o:["Memindahkan salah satu murid ke kamar lain sementara waktu","Melakukan mediasi dan menggali penyebab perilaku agresif secara mendalam","Menetapkan aturan tambahan khusus bagi kedua murid tersebut","Mencatat kejadian sebagai bahan evaluasi bulanan","Mengingatkan kedua murid untuk saling menjaga sikap"],
+   a:1,p:"Mediasi dan penggalian penyebab menjadi langkah dasar sebelum menentukan tindakan lanjutan yang tepat."},
+
+  {q:"Wali Asuh ingin membangun budaya saling menghormati antarmurid dari berbagai latar belakang di asrama. Strategi paling efektif untuk mencapai tujuan tersebut adalah...",
+   o:["Menyusun poster nilai-nilai asrama di area strategis","Mengintegrasikan nilai saling menghormati ke dalam kegiatan rutin asrama secara konsisten","Mengadakan sesi diskusi nilai satu kali dalam sebulan","Membentuk tim khusus pemantau sikap antarmurid","Menyampaikan nilai tersebut pada saat apel pagi rutin"],
+   a:1,p:"Pembiasaan nilai melalui kegiatan rutin lebih efektif membentuk karakter dibanding aturan formal semata."},
+  {q:"Seorang murid mengeluhkan sakit perut berulang setiap pagi sebelum kegiatan asrama dimulai. Sebagai Wali Asuh, langkah paling tepat untuk memastikan kondisi murid adalah...",
+   o:["Menyarankan murid beristirahat penuh pada pagi hari","Melakukan observasi pola keluhan dan berkoordinasi dengan petugas kesehatan jika diperlukan","Mengurangi beban kegiatan pagi murid sementara waktu","Meminta murid memeriksakan diri secara mandiri ke klinik","Mencatat keluhan sebagai laporan rutin mingguan asrama"],
+   a:1,p:"Observasi pola keluhan dan koordinasi dengan pihak kesehatan diperlukan untuk memastikan apakah keluhan bersifat fisik atau psikologis."},
+
+  {q:"Dalam memantau pola makan murid di asrama, Wali Asuh menemukan beberapa murid sering tidak menghabiskan makanan yang disediakan. Aspek paling penting yang perlu dikaji terlebih dahulu adalah...",
+   o:["Menyesuaikan jadwal makan agar lebih fleksibel bagi murid","Mengidentifikasi penyebab, apakah terkait selera, kesehatan, atau faktor psikologis","Menanyakan pendapat murid tentang variasi menu asrama","Membandingkan pola makan antarmurid dalam satu kamar","Mencatat jumlah sisa makanan sebagai bahan laporan bulanan"],
+   a:1,p:"Identifikasi penyebab yang akurat menjadi dasar penentuan intervensi yang tepat terkait pola makan murid."},
+
+  {q:"Seorang murid mengalami cedera ringan saat kegiatan olahraga asrama. Tindakan paling tepat yang harus dilakukan Wali Asuh secara berurutan adalah...",
+   o:["Memberikan pertolongan pertama, mendokumentasikan kejadian, lalu melaporkan sesuai prosedur","Menghubungi orang tua terlebih dahulu sebelum menangani cedera","Menghentikan kegiatan olahraga hingga cedera murid pulih","Merujuk murid ke fasilitas kesehatan tanpa penanganan awal","Mencatat kejadian pada akhir hari sebagai bahan evaluasi"],
+   a:0,p:"Penanganan cedera yang sistematis mencakup pertolongan pertama, dokumentasi, dan pelaporan sesuai prosedur yang berlaku."},
+
+  {q:"Wali Asuh menemukan bahwa kebersihan diri sebagian murid kurang terjaga meski fasilitas sudah memadai. Pendekatan paling tepat untuk mengatasi hal ini adalah...",
+   o:["Menetapkan jadwal kebersihan wajib yang diawasi ketat","Memberikan edukasi dan pembiasaan rutin terkait kebersihan diri secara bertahap","Menugaskan murid senior untuk mengingatkan setiap hari","Memberikan contoh langsung tanpa penjelasan lebih lanjut","Menyampaikan teguran umum saat apel pagi asrama"],
+   a:1,p:"Edukasi dan pembiasaan rutin lebih efektif membangun kesadaran kebersihan dibanding sanksi semata."},
+
+  {q:"Dalam rangka monitoring kesehatan murid, Wali Asuh perlu menyusun sistem pencatatan yang efektif. Aspek paling penting dalam sistem pencatatan tersebut adalah...",
+   o:["Kelengkapan dan keakuratan data yang dapat ditindaklanjuti secara tepat waktu","Kemudahan akses bagi seluruh petugas asrama","Kecepatan pengisian data pada setiap kegiatan harian","Kesesuaian format dengan laporan sekolah pada umumnya","Ketersediaan salinan cadangan pada setiap pencatatan"],
+   a:0,p:"Kelengkapan dan keakuratan data menjadi kunci agar sistem pencatatan dapat digunakan untuk tindak lanjut yang tepat."},
+
+  {q:"Seorang murid menunjukkan tanda-tanda kelelahan fisik yang berlebihan akibat padatnya jadwal kegiatan asrama. Langkah paling tepat yang harus diambil Wali Asuh adalah...",
+   o:["Menambah waktu tidur murid pada akhir pekan","Mengevaluasi beban kegiatan dan menyesuaikan dengan kondisi kesehatan murid","Memberikan izin absen sementara dari kegiatan tertentu","Menyarankan murid mengonsumsi vitamin tambahan sesuai anjuran petugas kesehatan","Memindahkan jadwal kegiatan berat ke waktu lebih pagi"],
+   a:1,p:"Evaluasi beban kegiatan diperlukan untuk memastikan keseimbangan antara aktivitas dan kesehatan fisik murid."},
+
+  {q:"Wali Asuh menemukan murid yang mengalami alergi terhadap makanan tertentu namun belum tercatat dalam data kesehatan. Tindakan paling tepat adalah...",
+   o:["Menyarankan murid menghindari makanan tersebut secara mandiri","Memverifikasi informasi, mendokumentasikan, dan berkoordinasi dengan petugas dapur dan kesehatan","Meminta orang tua mengirimkan surat keterangan alergi resmi","Mengganti menu murid tersebut tanpa memberi tahu petugas dapur","Mencatat informasi untuk dimasukkan pada laporan akhir semester"],
+   a:1,p:"Verifikasi dan dokumentasi yang tepat penting agar risiko kesehatan murid dapat dicegah secara sistematis."},
+
+  {q:"Dalam kondisi cuaca ekstrem, Wali Asuh perlu memastikan kesejahteraan fisik murid di asrama. Langkah antisipatif paling tepat adalah...",
+   o:["Menyediakan perlengkapan tambahan sesuai kebutuhan cuaca","Menyesuaikan jadwal dan fasilitas pendukung sesuai kondisi cuaca secara proaktif","Mengurangi durasi kegiatan luar ruangan sementara waktu","Meminta murid tetap berada di dalam asrama saat cuaca buruk","Memantau kondisi murid lebih ketat selama cuaca ekstrem"],
+   a:1,p:"Pendekatan proaktif dalam penyesuaian jadwal mencerminkan kesiapsiagaan Wali Asuh terhadap kondisi yang memengaruhi kesejahteraan murid."},
+
+  {q:"Seorang murid yang baru mengalami kehilangan anggota keluarga menunjukkan perubahan emosi yang signifikan. Pendekatan pendampingan psikososial paling tepat adalah...",
+   o:["Mengalihkan perhatian murid dengan kegiatan yang menyenangkan","Memberikan ruang berduka yang aman sambil tetap memantau perkembangan emosionalnya","Menyarankan murid berbicara dengan teman sekamar secara rutin","Memberikan waktu libur penuh dari seluruh kegiatan asrama","Mengajak murid berkonsultasi dengan psikolog secara langsung"],
+   a:1,p:"Pendampingan psikososial yang sehat memberi ruang bagi proses berduka sambil tetap memantau kondisi murid secara berkelanjutan."},
+
+  {q:"Wali Asuh mendapati murid menunjukkan tanda-tanda kecemasan berlebihan menjelang ujian. Pendekatan paling tepat untuk membantu murid adalah...",
+   o:["Menyusun jadwal belajar tambahan bersama murid","Memberikan dukungan emosional dan teknik pengelolaan stres yang sesuai usia murid","Mengingatkan murid untuk tetap tenang menghadapi ujian","Membantu murid mengulas kembali materi yang dianggap sulit","Menyarankan murid beristirahat penuh sehari sebelum ujian"],
+   a:1,p:"Dukungan emosional dan teknik pengelolaan stres yang tepat membantu murid menghadapi kecemasan secara sehat."},
+  {q:"Dalam mendampingi murid yang pernah mengalami pengalaman traumatis sebelum masuk Sekolah Rakyat, prinsip utama yang harus dipegang Wali Asuh adalah...",
+   o:["Memberikan perhatian ekstra dibanding murid lainnya","Menerapkan pendekatan yang sensitif terhadap trauma tanpa memaksa murid membuka diri","Mengajak murid mengikuti sesi konseling secara rutin","Mencatat riwayat trauma sebagai dasar pengawasan khusus","Memberikan kebebasan penuh agar murid tidak merasa tertekan"],
+   a:1,p:"Pendekatan trauma-informed care menekankan kepekaan tanpa memaksa murid mengungkap pengalaman traumatis."},
+
+  {q:"Seorang murid menunjukkan penurunan motivasi belajar yang berkaitan dengan masalah emosional di rumah. Langkah kolaboratif paling tepat dilakukan Wali Asuh adalah...",
+   o:["Memberikan motivasi tambahan melalui pendekatan personal secara rutin","Berkoordinasi dengan wali kelas dan, jika diperlukan, tenaga konseling untuk pendampingan yang komprehensif","Menyarankan murid fokus pada kegiatan asrama sebagai pengalih perhatian","Menghubungi keluarga murid untuk mendapat penjelasan lebih lanjut","Menyesuaikan target akademik murid sementara waktu"],
+   a:1,p:"Pendampingan komprehensif memerlukan koordinasi lintas pihak agar penanganan masalah emosional murid lebih efektif."},
+
+  {q:"Wali Asuh ingin membangun rasa aman psikologis bagi murid baru selama masa transisi di asrama. Strategi paling efektif yang dapat diterapkan adalah...",
+   o:["Menyediakan sesi perkenalan resmi pada hari pertama","Membangun komunikasi terbuka dan rutin untuk mengenali kebutuhan emosional murid","Menugaskan murid senior sebagai pendamping tetap","Menjelaskan seluruh aturan asrama secara rinci sejak awal","Memberikan waktu adaptasi tanpa keterlibatan aktif Wali Asuh"],
+   a:1,p:"Komunikasi terbuka dan rutin membangun rasa aman psikologis yang menjadi fondasi adaptasi murid baru."},
+
+  {q:"Dalam mendampingi murid yang menunjukkan gejala perundungan (bullying) sebagai korban, langkah pertama paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Mengumpulkan keterangan dari saksi yang mengetahui kejadian","Memastikan keamanan dan kenyamanan korban terlebih dahulu sebelum menelusuri kejadian lebih lanjut","Memanggil pelaku untuk memberikan klarifikasi awal","Menyampaikan kejadian kepada wali kelas untuk ditindaklanjuti","Mencatat kronologi kejadian berdasarkan laporan korban"],
+   a:1,p:"Keamanan dan kenyamanan korban menjadi prioritas utama sebelum proses investigasi dan mediasi dilakukan."},
+
+  {q:"Seorang murid menunjukkan perilaku menyendiri secara terus-menerus dan enggan berkomunikasi dengan siapa pun. Pendekatan paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Mengajak murid terlibat dalam kegiatan kelompok kecil terlebih dahulu","Melakukan pendekatan bertahap dan membangun kepercayaan tanpa memaksa murid terbuka secara instan","Menanyakan penyebabnya secara langsung pada kesempatan pertama","Meminta teman dekat murid membantu proses pendekatan","Memberikan waktu tersendiri sebelum melakukan intervensi apa pun"],
+   a:1,p:"Pendekatan bertahap yang membangun kepercayaan lebih efektif dibanding pemaksaan dalam menangani murid yang menarik diri."},
+
+  {q:"Wali Asuh menemukan indikasi murid mengalami tekanan psikologis akibat ekspektasi tinggi dari keluarga. Langkah pendampingan paling tepat adalah...",
+   o:["Membantu murid menyusun target belajar yang lebih realistis","Memberikan ruang dialog dan, bila perlu, berkomunikasi dengan keluarga untuk menyelaraskan ekspektasi","Menyarankan murid fokus pada kemampuan yang dimiliki saat ini","Mendorong murid untuk terbuka mengenai perasaannya kepada keluarga","Memberikan dukungan moral tanpa melibatkan pihak keluarga"],
+   a:1,p:"Dialog terbuka dan komunikasi dengan keluarga membantu menyelaraskan ekspektasi demi kesejahteraan psikologis murid."},
+
+  {q:"Dalam mendampingi murid yang mengalami kesulitan mengelola emosi marah, pendekatan paling efektif yang dapat diterapkan Wali Asuh adalah...",
+   o:["Memberikan waktu menenangkan diri setiap kali murid marah","Mengajarkan teknik pengelolaan emosi secara bertahap disertai pendampingan konsisten","Menjelaskan konsekuensi dari sikap marah yang berlebihan","Mengalihkan perhatian murid ke kegiatan lain saat emosi memuncak","Membahas penyebab kemarahan setelah murid tenang kembali"],
+   a:1,p:"Pengajaran teknik pengelolaan emosi yang konsisten membantu murid membangun kemampuan regulasi diri secara bertahap."},
+
+  {q:"Seorang murid sering menunjukkan perilaku mencari perhatian secara berlebihan di lingkungan asrama. Pendekatan paling tepat untuk memahami akar perilaku tersebut adalah...",
+   o:["Memberikan tanggung jawab kecil agar energi murid tersalurkan","Menggali kebutuhan emosional yang mendasari perilaku mencari perhatian melalui pendekatan personal","Mengarahkan murid pada kegiatan yang melibatkan banyak orang","Membatasi interaksi murid dengan kelompok tertentu sementara waktu","Menjelaskan batasan perilaku yang wajar dalam kegiatan bersama"],
+   a:1,p:"Perilaku mencari perhatian sering mencerminkan kebutuhan emosional yang belum terpenuhi sehingga perlu digali lebih dalam."},
+
+  {q:"Wali Asuh mendapati murid mengalami penurunan nilai akademik yang signifikan dalam dua bulan terakhir. Langkah analitis paling tepat sebelum menentukan bentuk pendampingan adalah...",
+   o:["Menyusun jadwal belajar tambahan bersama wali kelas","Mengidentifikasi faktor penyebab penurunan, baik akademik maupun nonakademik, secara komprehensif","Meminta murid menjelaskan penyebab penurunan nilainya","Membandingkan nilai murid dengan capaian semester sebelumnya","Menyampaikan hasil evaluasi kepada orang tua murid"],
+   a:1,p:"Identifikasi faktor penyebab secara komprehensif diperlukan agar bentuk pendampingan akademik yang diberikan tepat sasaran."},
+
+  {q:"Dalam mendukung perkembangan akademik murid, Wali Asuh perlu berkoordinasi dengan wali kelas. Bentuk koordinasi paling efektif yang dapat dilakukan adalah...",
+   o:["Bertukar informasi perkembangan murid secara berkala untuk menyusun pendampingan yang selaras","Menyampaikan laporan akademik murid setiap akhir semester","Meminta wali kelas menangani seluruh aspek akademik murid","Mendiskusikan perkembangan murid hanya saat terjadi kendala tertentu","Menyerahkan catatan observasi harian tanpa pembahasan lanjutan"],
+   a:0,p:"Koordinasi berkala dan dua arah memastikan pendampingan akademik dan nonakademik murid berjalan selaras."},
+  {q:"Seorang murid menunjukkan minat besar pada bidang tertentu namun fasilitas pendukung di asrama terbatas. Langkah paling tepat yang dapat dilakukan Wali Asuh adalah...",
+   o:["Menyarankan murid mengembangkan minat tersebut secara mandiri","Mengidentifikasi alternatif sumber daya atau kolaborasi pihak terkait untuk memfasilitasi minat murid","Mengarahkan murid pada bidang lain yang fasilitasnya lebih tersedia","Mencatat minat murid sebagai bahan pertimbangan program mendatang","Menyampaikan keterbatasan fasilitas secara terbuka kepada murid"],
+   a:1,p:"Pencarian alternatif sumber daya secara kreatif mencerminkan pendekatan solutif dalam memfasilitasi potensi murid."},
+
+  {q:"Wali Asuh menemukan bahwa waktu belajar mandiri murid di asrama sering tidak digunakan secara efektif. Strategi paling tepat untuk meningkatkan efektivitas waktu belajar adalah...",
+   o:["Menetapkan target capaian pada setiap sesi belajar mandiri","Mengevaluasi metode pendampingan belajar dan menyesuaikan dengan gaya belajar murid","Mengatur ulang lokasi belajar agar lebih kondusif","Menugaskan murid senior mendampingi sesi belajar mandiri","Memperpanjang durasi waktu belajar mandiri setiap harinya"],
+   a:1,p:"Evaluasi dan penyesuaian metode pendampingan belajar lebih efektif dibanding sekadar menambah durasi waktu."},
+
+  {q:"Dalam mendampingi murid yang mengalami kesulitan belajar tertentu, langkah awal paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Menyusun jadwal belajar tambahan bersama murid","Berkoordinasi dengan wali kelas untuk memahami karakteristik kesulitan belajar murid secara spesifik","Mendampingi murid mengulang materi yang dianggap sulit","Menanyakan langsung kepada murid bagian mana yang sulit dipahami","Membandingkan metode belajar murid dengan teman sekamarnya"],
+   a:1,p:"Pemahaman karakteristik kesulitan belajar secara spesifik menjadi dasar penyusunan pendampingan yang tepat."},
+
+  {q:"Seorang murid menunjukkan ketertarikan tinggi pada kegiatan nonakademik namun cenderung mengabaikan tugas akademik. Pendekatan paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Membatasi keikutsertaan murid pada kegiatan nonakademik sementara","Membantu murid menyeimbangkan waktu antara kegiatan akademik dan nonakademik secara terstruktur","Menetapkan syarat nilai akademik untuk mengikuti kegiatan nonakademik","Mengingatkan murid secara berkala tentang tugas akademiknya","Mendiskusikan prioritas kegiatan bersama wali kelas murid"],
+   a:1,p:"Pendampingan untuk menyeimbangkan kegiatan akademik dan nonakademik membantu murid berkembang secara holistik."},
+
+  {q:"Wali Asuh mengamati murid yang sering merasa minder dibandingkan teman-temannya dalam hal kemampuan akademik. Pendekatan paling tepat untuk membangun rasa percaya diri murid adalah...",
+   o:["Memberikan bimbingan belajar tambahan secara berkala","Memberikan apresiasi atas kemajuan personal murid tanpa membandingkan dengan murid lain","Menyampaikan bahwa setiap murid memiliki kelebihan berbeda","Mendorong murid berlatih lebih giat agar mengejar ketertinggalan","Mengajak murid berdiskusi tentang penyebab rasa mindernya"],
+   a:1,p:"Apresiasi terhadap kemajuan personal lebih efektif membangun rasa percaya diri dibanding perbandingan dengan murid lain."},
+
+  {q:"Dua murid di asrama terlibat konflik berulang akibat perbedaan kebiasaan sehari-hari. Langkah penyelesaian konflik paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Menetapkan aturan bersama yang harus disepakati kedua murid","Memfasilitasi mediasi untuk memahami sudut pandang masing-masing dan mencari solusi bersama","Memisahkan kamar kedua murid untuk sementara waktu","Meminta salah satu murid menyesuaikan kebiasaannya","Mencatat konflik sebagai bahan evaluasi mingguan asrama"],
+   a:1,p:"Mediasi yang melibatkan kedua belah pihak secara adil mendorong penyelesaian konflik yang konstruktif."},
+
+  {q:"Wali Asuh mendapati indikasi perundungan verbal yang dilakukan sekelompok murid terhadap satu murid tertentu. Langkah pertama yang paling tepat dilakukan adalah...",
+   o:["Mengumpulkan keterangan dari beberapa saksi kejadian","Menghentikan tindakan tersebut, melindungi korban, dan menelusuri kejadian secara objektif","Memanggil kelompok murid tersebut untuk klarifikasi awal","Melaporkan kejadian kepada wali kelas untuk ditindaklanjuti","Mencatat kejadian sebagai bahan pembinaan mingguan"],
+   a:1,p:"Perlindungan korban dan penelusuran objektif menjadi prioritas sebelum proses pembinaan terhadap pelaku dilakukan."},
+
+  {q:"Dalam menangani kasus perundungan, Wali Asuh perlu memastikan proses pembinaan terhadap pelaku tetap mendidik. Pendekatan paling tepat yang dapat diterapkan adalah...",
+   o:["Memberikan sanksi sesuai tata tertib yang berlaku","Memberikan pembinaan reflektif yang membantu pelaku memahami dampak tindakannya serta membangun empati","Meminta pelaku meminta maaf secara langsung kepada korban","Memisahkan pelaku dari kelompok pertemanannya sementara waktu","Melibatkan orang tua pelaku dalam proses pembinaan"],
+   a:1,p:"Pembinaan reflektif yang membangun empati lebih mendidik dibanding hukuman yang bersifat menghukum semata."},
+
+  {q:"Wali Asuh menemukan adanya kelompok murid yang kerap melakukan eksklusi sosial terhadap murid tertentu secara halus. Langkah pembinaan paling tepat untuk mengatasi dinamika ini adalah...",
+   o:["Menegur kelompok tersebut secara personal tanpa melibatkan pihak lain","Mengamati pola interaksi secara cermat dan merancang kegiatan yang mendorong inklusi sosial","Menempatkan murid yang dikecualikan pada kelompok baru","Membahas dinamika kelompok pada sesi pembinaan karakter","Mendorong murid yang dikecualikan untuk lebih aktif bersosialisasi"],
+   a:1,p:"Pengamatan cermat dan kegiatan inklusif yang dirancang khusus efektif mengatasi eksklusi sosial yang bersifat halus."},
+
+  {q:"Seorang murid melaporkan bahwa ia mendapat ancaman dari murid lain di luar pengawasan langsung Wali Asuh. Tindakan paling tepat yang harus dilakukan adalah...",
+   o:["Mencatat laporan sebagai dasar pemantauan lanjutan","Menindaklanjuti laporan secara serius dengan investigasi dan langkah perlindungan yang sesuai","Mempertemukan kedua murid untuk klarifikasi bersama","Meminta murid pelapor menghindari pertemuan dengan pihak terkait","Menyampaikan laporan tersebut kepada wali kelas terlebih dahulu"],
+   a:1,p:"Setiap laporan ancaman harus ditindaklanjuti secara serius untuk memastikan keselamatan dan kenyamanan murid."},
+  {q:"Wali Asuh ingin mencegah terjadinya konflik antarmurid akibat persaingan tidak sehat dalam kegiatan asrama. Strategi pencegahan paling tepat adalah...",
+   o:["Membatasi jumlah kegiatan kompetitif dalam sebulan","Merancang kegiatan yang menekankan kerja sama dan apresiasi atas usaha, bukan hanya hasil akhir","Menetapkan aturan ketat dalam setiap kegiatan kompetitif","Memberikan penjelasan tentang sportivitas sebelum kegiatan dimulai","Mengawasi jalannya kegiatan kompetitif secara lebih ketat"],
+   a:1,p:"Kegiatan yang menekankan kerja sama dan apresiasi proses membantu mencegah persaingan yang berujung konflik."},
+
+  {q:"Dalam menangani konflik antara murid senior dan junior terkait senioritas, pendekatan paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Menetapkan aturan interaksi baru antara senior dan junior","Menegaskan batasan yang sehat dan membangun budaya saling menghormati lintas angkatan","Memisahkan kegiatan murid senior dan junior sementara waktu","Mengadakan sesi dialog terbuka antara kedua angkatan","Memberikan pengawasan tambahan pada interaksi lintas angkatan"],
+   a:1,p:"Penegasan batasan yang sehat penting untuk mencegah budaya senioritas berkembang menjadi tindakan merugikan."},
+
+  {q:"Seorang murid menunjukkan tanda-tanda menjadi pelaku sekaligus korban dalam dinamika konflik kelompok. Pendekatan paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Menangani kasus tersebut secara bertahap dari peran yang paling menonjol","Memahami kompleksitas situasi murid secara menyeluruh sebelum menentukan bentuk pendampingan","Memisahkan murid dari kelompok yang terlibat konflik","Melibatkan wali kelas untuk membantu proses klarifikasi","Mencatat kedua peran murid sebagai bahan evaluasi lanjutan"],
+   a:1,p:"Pemahaman menyeluruh terhadap kompleksitas peran murid penting agar pendampingan yang diberikan tepat dan adil."},
+
+  {q:"Wali Asuh perlu menyampaikan laporan perkembangan murid kepada orang tua yang jarang dapat dihubungi karena keterbatasan akses komunikasi. Strategi paling tepat yang dapat dilakukan adalah...",
+   o:["Menitipkan pesan melalui murid untuk disampaikan kepada orang tua","Mencari alternatif media komunikasi yang sesuai dengan kondisi orang tua, seperti melalui perangkat desa atau kunjungan terjadwal","Menyimpan laporan untuk disampaikan saat orang tua berkunjung","Menghubungi kerabat terdekat sebagai perantara komunikasi","Menyampaikan laporan secara tertulis melalui surat pos"],
+   a:1,p:"Pencarian alternatif komunikasi yang kontekstual penting agar hak orang tua memperoleh informasi tetap terpenuhi."},
+
+  {q:"Dalam berkoordinasi dengan wali kelas terkait perkembangan murid, Wali Asuh sebaiknya menyampaikan informasi yang...",
+   o:["Ringkas dan berfokus pada capaian akademik murid","Faktual, relevan, dan berbasis observasi serta dokumentasi yang dapat dipertanggungjawabkan","Disusun berdasarkan penilaian umum terhadap sikap murid","Mencakup seluruh aktivitas murid selama di asrama","Disampaikan sesuai permintaan wali kelas semata"],
+   a:1,p:"Informasi yang faktual dan berbasis dokumentasi memastikan koordinasi antarpihak berjalan akurat dan bermanfaat."},
+
+  {q:"Wali Asuh menerima keluhan dari orang tua terkait perlakuan yang dianggap kurang tepat terhadap anaknya di asrama. Langkah paling tepat dalam merespons keluhan tersebut adalah...",
+   o:["Menjelaskan prosedur pengasuhan yang berlaku di asrama","Mendengarkan keluhan secara terbuka, melakukan klarifikasi internal, dan memberikan tanggapan berdasarkan fakta","Meminta murid menjelaskan kejadian yang dimaksud orang tua","Menyampaikan permintaan maaf sambil menjanjikan perbaikan","Melibatkan Kepala Sekolah dalam penanganan keluhan tersebut"],
+   a:1,p:"Respons yang terbuka dan berbasis fakta mencerminkan profesionalisme dan akuntabilitas dalam pengasuhan."},
+
+  {q:"Dalam membangun kolaborasi dengan pihak luar seperti lembaga sosial atau komunitas, Wali Asuh perlu memastikan kerja sama tersebut...",
+   o:["Dapat memberikan manfaat tambahan bagi kegiatan asrama","Selaras dengan kebutuhan layanan murid dan dilakukan sesuai prosedur kelembagaan yang berlaku","Melibatkan persetujuan seluruh murid yang terdampak","Tidak mengganggu jadwal kegiatan rutin asrama","Dilaksanakan dengan pelibatan minimal dari pihak sekolah"],
+   a:1,p:"Kolaborasi dengan pihak luar harus selaras dengan kebutuhan murid dan mengikuti prosedur kelembagaan yang berlaku."},
+
+  {q:"Wali Asuh perlu melaporkan kondisi murid yang berisiko kepada Kepala Sekolah. Aspek paling penting yang harus disertakan dalam laporan tersebut adalah...",
+   o:["Ringkasan singkat tentang kondisi murid terkini","Kronologi kejadian, data observasi, serta langkah yang telah dan akan dilakukan","Rekomendasi tindakan dari sudut pandang Wali Asuh","Perkembangan murid dibandingkan dengan bulan sebelumnya","Tanggapan awal dari murid terhadap kondisi yang dialami"],
+   a:1,p:"Laporan yang komprehensif mencakup kronologi, data, dan langkah penanganan agar tindak lanjut dapat diambil secara tepat."},
+
+  {q:"Dalam situasi murid mengalami masalah yang memerlukan keterlibatan psikolog sekolah, langkah koordinasi paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Menjadwalkan pertemuan awal antara murid dan psikolog","Melakukan rujukan disertai informasi observasi yang relevan agar penanganan psikolog lebih efektif","Menyampaikan permasalahan murid secara lisan saat bertemu psikolog","Menyiapkan murid secara mental sebelum sesi konseling dimulai","Menunggu psikolog meminta data sebelum menyampaikan informasi"],
+   a:1,p:"Rujukan yang disertai informasi observasi relevan membantu psikolog memahami kondisi murid secara lebih komprehensif."},
+
+  {q:"Wali Asuh perlu menjalin komunikasi dengan tokoh masyarakat di daerah asal murid untuk mendukung proses pengasuhan. Manfaat utama dari kolaborasi ini adalah...",
+   o:["Memudahkan komunikasi dengan keluarga murid di daerah asal","Memperkuat pemahaman konteks sosial budaya murid yang mendukung pendekatan pengasuhan yang lebih tepat","Membantu proses verifikasi data murid saat pendaftaran","Menambah jaringan mitra sekolah di berbagai daerah","Memberikan referensi tambahan bagi program pengasuhan asrama"],
+   a:1,p:"Pemahaman konteks sosial budaya dari tokoh masyarakat memperkaya pendekatan pengasuhan yang lebih kontekstual."},
+  {q:"Dalam rapat koordinasi rutin antara Wali Asuh, wali kelas, dan pengelola asrama, fokus utama yang seharusnya dibahas adalah...",
+   o:["Jadwal kegiatan asrama untuk periode mendatang","Perkembangan holistik murid serta sinkronisasi langkah pendampingan antarpihak","Kendala teknis yang dihadapi selama pelaksanaan program","Evaluasi capaian akademik murid pada periode berjalan","Pembagian tugas antarpihak dalam pengasuhan sehari-hari"],
+   a:1,p:"Fokus rapat koordinasi yang berorientasi pada perkembangan murid memastikan sinergi layanan antarpihak berjalan optimal."},
+
+  {q:"Wali Asuh menemukan bahwa informasi penting terkait kondisi murid tidak tersampaikan dengan baik antar shift petugas asrama. Langkah perbaikan paling tepat adalah...",
+   o:["Mengadakan pertemuan singkat sebelum pergantian shift","Menyusun sistem serah terima informasi yang terdokumentasi secara konsisten antar petugas","Menugaskan satu petugas khusus sebagai penghubung informasi","Menyampaikan informasi penting melalui pesan singkat antarpetugas","Menetapkan jadwal pelaporan harian bagi setiap petugas"],
+   a:1,p:"Sistem serah terima informasi yang terdokumentasi memastikan kontinuitas layanan pengasuhan antar shift petugas."},
+
+  {q:"Wali Asuh diminta menyusun laporan bulanan perkembangan murid binaannya. Pendekatan paling tepat dalam menyusun laporan tersebut adalah...",
+   o:["Merangkum capaian murid yang paling menonjol selama sebulan","Menyusun laporan berbasis data observasi harian yang telah didokumentasikan secara sistematis","Menyusun laporan berdasarkan hasil diskusi dengan murid","Menyertakan penilaian umum terhadap sikap dan perilaku murid","Menyusun laporan mengikuti format yang digunakan bulan sebelumnya"],
+   a:1,p:"Laporan yang berbasis data observasi sistematis lebih akurat dan dapat dipertanggungjawabkan dibanding kesan subjektif."},
+
+  {q:"Dalam mendokumentasikan kejadian insidental di asrama, aspek paling penting yang harus dicantumkan Wali Asuh adalah...",
+   o:["Ringkasan kejadian beserta pihak yang menyaksikan","Waktu, kronologi, pihak yang terlibat, dan tindak lanjut yang dilakukan secara objektif","Dampak kejadian terhadap murid yang terlibat","Penilaian awal Wali Asuh terhadap penyebab kejadian","Rekomendasi tindak lanjut yang perlu segera dilakukan"],
+   a:1,p:"Dokumentasi yang objektif dan lengkap penting agar kejadian dapat ditindaklanjuti secara akurat dan transparan."},
+
+  {q:"Wali Asuh menemukan ketidaksesuaian antara catatan perkembangan murid dengan kondisi aktual di lapangan. Langkah paling tepat yang harus dilakukan adalah...",
+   o:["Menambahkan catatan baru sesuai kondisi terkini","Melakukan verifikasi ulang dan memperbarui data agar sesuai dengan kondisi terkini","Mengonfirmasi perbedaan tersebut kepada petugas pencatat sebelumnya","Menyusun catatan tambahan sebagai lampiran data lama","Menjadikan kondisi aktual sebagai acuan pelaporan berikutnya"],
+   a:1,p:"Verifikasi dan pembaruan data memastikan informasi yang digunakan untuk pengambilan keputusan selalu akurat dan relevan."},
+
+  {q:"Dalam menyusun indikator monitoring perkembangan murid, Wali Asuh sebaiknya menggunakan indikator yang...",
+   o:["Mudah dipahami oleh seluruh petugas asrama","Terukur, relevan, dan mencerminkan aspek perkembangan yang ingin dipantau secara spesifik","Dapat diterapkan pada seluruh murid tanpa pengecualian","Sesuai dengan indikator yang digunakan sekolah lain","Fleksibel sehingga dapat disesuaikan dengan kondisi asrama sewaktu-waktu"],
+   a:1,p:"Indikator yang terukur dan relevan memungkinkan monitoring perkembangan murid dilakukan secara objektif dan bermakna."},
+
+  {q:"Wali Asuh perlu memastikan kerahasiaan data sensitif murid, seperti riwayat kesehatan atau masalah keluarga. Prinsip paling tepat yang harus diterapkan adalah...",
+   o:["Menyimpan data dalam catatan pribadi Wali Asuh","Menjaga kerahasiaan data dan hanya membagikannya kepada pihak yang berwenang serta relevan","Membahas data tersebut hanya dalam forum internal asrama","Menyampaikan data kepada wali kelas sebagai bentuk transparansi","Membatasi akses data hanya bagi Wali Asuh yang bersangkutan"],
+   a:1,p:"Kerahasiaan data sensitif murid harus dijaga sesuai prinsip etika dan perlindungan data pribadi."},
+
+  {q:"Dalam memantau perkembangan jangka panjang murid, Wali Asuh perlu membandingkan data dari waktu ke waktu. Manfaat utama dari pendekatan ini adalah...",
+   o:["Memudahkan penyusunan laporan tahunan kegiatan pengasuhan asrama","Mengidentifikasi pola perkembangan dan menentukan kebutuhan intervensi secara tepat waktu","Memberikan gambaran umum tentang kondisi asrama","Membantu menyusun target capaian murid berikutnya","Menjadi bahan evaluasi kinerja Wali Asuh"],
+   a:1,p:"Pemantauan data dari waktu ke waktu membantu mengidentifikasi pola perkembangan murid untuk intervensi yang tepat waktu."},
+
+  {q:"Wali Asuh menemukan adanya murid yang berpotensi mengalami risiko keselamatan akibat kondisi fasilitas asrama yang kurang memadai. Tindakan paling tepat yang harus dilakukan adalah...",
+   o:["Mencatat kondisi fasilitas sebagai bahan evaluasi berkala","Melaporkan kondisi tersebut segera kepada pihak pengelola fasilitas agar ditindaklanjuti","Mengalihkan murid ke area asrama yang lebih aman sementara","Menyampaikan kondisi tersebut pada rapat koordinasi bulanan","Memberikan peringatan kepada murid agar berhati-hati"],
+   a:1,p:"Pelaporan segera kepada pihak berwenang penting untuk mencegah risiko keselamatan murid akibat fasilitas yang kurang memadai."},
+
+  {q:"Dalam situasi darurat seperti kebakaran kecil di area asrama, langkah paling tepat yang harus diambil Wali Asuh terlebih dahulu adalah...",
+   o:["Menghubungi petugas keamanan sekolah secepatnya sebelum bertindak lebih lanjut","Mengutamakan evakuasi dan keselamatan murid sesuai prosedur darurat yang berlaku","Memadamkan sumber api menggunakan alat yang tersedia","Mengarahkan murid berkumpul di titik aman terdekat","Menghitung jumlah murid sebelum melakukan tindakan lanjutan"],
+   a:1,p:"Dalam situasi darurat, keselamatan murid harus diutamakan dengan mengikuti prosedur evakuasi yang telah ditetapkan."},
+  {q:"Wali Asuh menerima informasi bahwa terdapat orang asing yang mencurigakan di sekitar area asrama pada malam hari. Tindakan paling tepat yang harus dilakukan adalah...",
+   o:["Memeriksa area tersebut bersama petugas keamanan asrama","Memastikan keamanan murid, melakukan pengecekan, dan melaporkan ke pihak keamanan sesuai prosedur","Meminta murid tetap berada di dalam kamar masing-masing","Mencatat kejadian sebagai laporan malam untuk shift berikutnya","Mengecek kembali kondisi tersebut sebelum melapor ke pihak lain"],
+   a:1,p:"Keamanan murid menjadi prioritas utama, dengan tindak lanjut yang sesuai prosedur dan koordinasi pihak keamanan."},
+
+  {q:"Dalam menyusun protokol keselamatan asrama, Wali Asuh perlu melibatkan murid dalam pemahaman prosedur darurat. Manfaat utama dari pelibatan ini adalah...",
+   o:["Mempercepat proses evakuasi saat simulasi dilakukan","Meningkatkan kesiapsiagaan murid sehingga dapat bertindak tepat saat situasi darurat terjadi","Mengurangi kebutuhan pengawasan Wali Asuh saat kegiatan berlangsung","Membantu murid memahami tata letak fasilitas asrama","Melatih murid untuk lebih disiplin dalam mengikuti aturan"],
+   a:1,p:"Pelibatan murid dalam pemahaman protokol keselamatan meningkatkan kesiapsiagaan kolektif dalam menghadapi situasi darurat."},
+
+  {q:"Seorang murid ditemukan menyimpan benda tajam tanpa izin di asrama. Langkah paling tepat yang harus dilakukan Wali Asuh adalah...",
+   o:["Menyita benda tersebut dan mencatatnya sebagai pelanggaran","Mengamankan benda tersebut, menggali alasan kepemilikan, dan menindaklanjuti sesuai prosedur keselamatan","Melaporkan temuan tersebut kepada Kepala Sekolah secara langsung","Memberikan peringatan tertulis kepada murid yang bersangkutan","Memeriksa barang bawaan seluruh murid di kamar tersebut"],
+   a:1,p:"Penanganan yang melibatkan klarifikasi dan tindak lanjut sesuai prosedur penting untuk memastikan keselamatan tanpa mengabaikan aspek pembinaan."},
+
+  {q:"Wali Asuh menerima laporan dugaan kekerasan yang dilakukan oleh pihak luar terhadap murid di luar lingkungan asrama. Langkah paling tepat yang harus dilakukan adalah...",
+   o:["Mendampingi murid dan mencatat kronologi kejadian secara rinci","Menindaklanjuti laporan secara serius, memberikan perlindungan, dan melaporkan sesuai prosedur kelembagaan dan hukum yang berlaku","Menyampaikan laporan tersebut kepada orang tua murid terlebih dahulu","Melakukan klarifikasi kepada pihak yang diduga terlibat","Memberikan waktu murid untuk memulihkan kondisi psikologisnya"],
+   a:1,p:"Dugaan kekerasan terhadap murid harus ditindaklanjuti serius dengan melibatkan pihak berwenang sesuai prosedur yang berlaku, demi perlindungan murid."},
+
+  {q:"Dalam menjaga keamanan barang pribadi murid di asrama, Wali Asuh perlu menyusun sistem yang...",
+   o:["Memudahkan murid menyimpan barang berharga secara pribadi","Jelas, terdokumentasi, dan disosialisasikan kepada seluruh murid untuk mencegah kehilangan atau konflik","Diawasi langsung oleh petugas asrama setiap saat","Membatasi jenis barang yang boleh dibawa ke asrama","Mewajibkan pelaporan setiap barang yang dimiliki murid"],
+   a:1,p:"Sistem yang jelas dan tersosialisasikan dengan baik mencegah kehilangan barang serta potensi konflik antarmurid."},
+
+  {q:"Seorang murid mengalami kecelakaan saat kegiatan luar asrama yang melibatkan pihak ketiga. Langkah pelaporan paling tepat yang harus dilakukan Wali Asuh adalah...",
+   o:["Mendampingi murid hingga mendapat penanganan medis yang memadai","Memberikan penanganan awal, melaporkan kejadian secara resmi, dan berkoordinasi dengan pihak terkait termasuk keluarga","Meminta keterangan dari pihak ketiga yang terlibat kejadian","Menyusun kronologi kejadian sebelum melakukan pelaporan","Menunggu instruksi dari Kepala Sekolah sebelum bertindak"],
+   a:1,p:"Penanganan awal yang cepat disertai pelaporan resmi dan koordinasi memastikan keselamatan murid tertangani secara menyeluruh."},
+
+  {q:"Wali Asuh menemukan adanya potensi konflik antara kebiasaan adat istiadat murid dengan aturan asrama. Pendekatan paling tepat untuk menyikapi hal ini adalah...",
+   o:["Menjelaskan alasan di balik aturan asrama kepada murid","Mencari titik temu yang menghormati nilai adat sekaligus menjaga ketertiban asrama","Memberikan pengecualian aturan bagi murid dengan latar adat tertentu","Mendiskusikan kebiasaan tersebut pada forum bersama murid lain","Menyesuaikan sebagian aturan asrama secara bertahap"],
+   a:1,p:"Pendekatan yang mencari titik temu antara nilai adat dan aturan asrama mencerminkan kepekaan budaya dalam pengasuhan."},
+
+  {q:"Dalam menjalankan tugas pengasuhan, Wali Asuh dihadapkan pada situasi di mana kebijakan pribadi bertentangan dengan ketentuan resmi Sekolah Rakyat. Sikap paling tepat yang harus diambil adalah...",
+   o:["Menyesuaikan sementara pendekatan pribadi dengan situasi yang dihadapi","Mengutamakan ketentuan resmi yang berlaku sambil menyampaikan masukan melalui jalur yang tepat jika diperlukan","Menerapkan kombinasi antara kebijakan pribadi dan ketentuan resmi","Mendiskusikan perbedaan tersebut dengan sesama Wali Asuh terlebih dahulu","Menunda penerapan kebijakan hingga ada kejelasan lebih lanjut"],
+   a:1,p:"Kepatuhan terhadap ketentuan resmi menjadi prioritas, dengan jalur komunikasi formal untuk menyampaikan masukan perbaikan."},
+
+  {q:"Wali Asuh menemukan murid yang menunjukkan perilaku tidak jujur secara berulang, seperti berbohong terkait kegiatan hariannya. Pendekatan pembinaan paling tepat adalah...",
+   o:["Memberikan konsekuensi yang mendidik atas ketidakjujuran murid","Membangun komunikasi yang membantu murid memahami pentingnya kejujuran melalui pendekatan reflektif dan konsisten","Mengonfirmasi kebenaran cerita murid kepada pihak terkait","Mengingatkan murid tentang pentingnya nilai kejujuran secara berkala","Mencatat pola ketidakjujuran murid sebagai bahan pembinaan lanjutan"],
+   a:1,p:"Pendekatan reflektif dan konsisten lebih efektif membangun nilai kejujuran dibanding sanksi yang bersifat menghukum."},
+
+  {q:"Dalam menjaga etika profesional sebagai Wali Asuh, batasan relasi yang paling tepat diterapkan terhadap murid binaan adalah...",
+   o:["Membangun kedekatan personal yang mendalam agar murid lebih terbuka","Membangun kedekatan yang hangat namun tetap menjaga batasan profesional sesuai kode etik","Memberikan perlakuan setara antara murid dan rekan kerja","Menjaga jarak formal dalam setiap bentuk komunikasi","Menyesuaikan tingkat kedekatan sesuai karakter masing-masing murid"],
+   a:1,p:"Kedekatan yang hangat namun tetap berbatas profesional menjaga efektivitas pengasuhan sekaligus melindungi murid dan Wali Asuh."},
+  {q:"Wali Asuh menemukan bahwa salah satu rekan kerjanya menunjukkan indikasi pelanggaran etika dalam menangani murid. Langkah paling tepat yang harus diambil adalah...",
+   o:["Menyampaikan kekhawatiran tersebut langsung kepada rekan kerja bersangkutan","Melaporkan indikasi tersebut melalui mekanisme pelaporan resmi yang berlaku di sekolah","Mengamati lebih lanjut untuk memastikan indikasi tersebut benar","Mendiskusikan situasi tersebut dengan sesama Wali Asuh lainnya","Mencatat kejadian sebagai bahan evaluasi kinerja tahunan"],
+   a:1,p:"Pelaporan melalui mekanisme resmi memastikan penanganan pelanggaran etika dilakukan secara profesional dan akuntabel."},
+
+  {q:"Dalam menyusun program pengasuhan tahunan, Wali Asuh perlu memastikan program tersebut selaras dengan regulasi yang berlaku terkait penyelenggaraan Sekolah Rakyat. Langkah paling tepat untuk memastikan keselarasan ini adalah...",
+   o:["Menyusun program berdasarkan hasil evaluasi tahun sebelumnya","Mempelajari ketentuan resmi yang berlaku dan mengonsultasikan rancangan program dengan pihak berwenang","Menyesuaikan program dengan kebutuhan murid yang teridentifikasi","Meminta masukan dari wali kelas sebelum program disusun","Menyusun program berdasarkan pengalaman praktik terbaik yang ada"],
+   a:1,p:"Pemahaman regulasi dan konsultasi dengan pihak berwenang memastikan program pengasuhan yang disusun sesuai ketentuan yang berlaku."},
+
+  {q:"Seorang murid menyampaikan keluhan terkait perlakuan Wali Asuh lain yang dianggap tidak sesuai. Sikap paling profesional yang harus ditunjukkan Wali Asuh yang menerima keluhan adalah...",
+   o:["Menyarankan murid menyampaikan keluhan langsung kepada pihak terkait","Mendengarkan keluhan secara objektif dan menindaklanjutinya melalui mekanisme yang sesuai","Mencatat keluhan tersebut sebagai bahan evaluasi internal","Mengonfirmasi kebenaran keluhan kepada murid lain terlebih dahulu","Menyampaikan keluhan tersebut pada rapat koordinasi berikutnya"],
+   a:1,p:"Sikap objektif dan tindak lanjut melalui mekanisme yang tepat mencerminkan profesionalisme dalam menangani keluhan murid."},
+
+  {q:"Wali Asuh menemukan bahwa beberapa murid memiliki kebutuhan khusus yang memerlukan pendekatan pengasuhan berbeda dari murid pada umumnya. Langkah paling tepat dalam menyusun layanan adalah...",
+   o:["Menyesuaikan sebagian jadwal kegiatan bagi murid berkebutuhan khusus","Menyusun pendekatan pengasuhan yang inklusif dan disesuaikan dengan kebutuhan khusus masing-masing murid","Berkoordinasi dengan tenaga ahli untuk menangani kebutuhan tersebut sepenuhnya","Menempatkan murid berkebutuhan khusus pada kelompok pendampingan tersendiri","Mencatat kebutuhan khusus murid sebagai bahan laporan berkala"],
+   a:1,p:"Pendekatan inklusif yang disesuaikan dengan kebutuhan khusus murid mencerminkan layanan pengasuhan yang adil dan tepat sasaran."},
+
+  {q:"Dalam mengevaluasi efektivitas program pengasuhan yang telah berjalan satu semester, Wali Asuh sebaiknya menggunakan pendekatan...",
+   o:["Evaluasi berdasarkan pencapaian target program yang ditetapkan","Evaluasi berbasis data perkembangan murid yang terdokumentasi serta umpan balik dari berbagai pihak terkait","Evaluasi yang melibatkan penilaian langsung dari murid binaan","Evaluasi berdasarkan perbandingan dengan program semester sebelumnya","Evaluasi yang berfokus pada efisiensi pelaksanaan kegiatan"],
+   a:1,p:"Evaluasi berbasis data dan umpan balik multi-pihak menghasilkan penilaian yang lebih objektif dan komprehensif terhadap efektivitas program."},
+
+  {q:"Seorang murid menunjukkan kemajuan signifikan dalam aspek kedisiplinan setelah mengikuti program pendampingan intensif. Langkah tindak lanjut paling tepat yang dilakukan Wali Asuh adalah...",
+   o:["Mengurangi intensitas pendampingan secara bertahap sesuai kemajuan murid","Memberikan apresiasi dan tetap memantau secara berkala untuk menjaga konsistensi kemajuan tersebut","Menjadikan murid sebagai contoh bagi murid lain","Menyusun evaluasi akhir sebagai penutup program pendampingan","Menyampaikan capaian tersebut kepada orang tua murid"],
+   a:1,p:"Apresiasi disertai pemantauan berkelanjutan penting untuk menjaga keberlanjutan kemajuan yang telah dicapai murid."},
+
+  {q:"Wali Asuh menemukan bahwa pendekatan pengasuhan yang diterapkan kepada satu kelompok murid kurang efektif dibandingkan kelompok lain. Langkah reflektif paling tepat yang harus dilakukan adalah...",
+   o:["Menerapkan pendekatan kelompok lain yang dianggap lebih berhasil","Menganalisis faktor penyebab perbedaan dan menyesuaikan pendekatan sesuai karakteristik kelompok","Mengevaluasi kembali seluruh program pengasuhan yang berjalan","Mendiskusikan perbedaan hasil tersebut dengan sesama Wali Asuh","Memberikan perhatian tambahan kepada kelompok yang kurang efektif"],
+   a:1,p:"Analisis faktor penyebab perbedaan efektivitas menjadi dasar penyesuaian pendekatan pengasuhan yang lebih kontekstual."},
+
+  {q:"Dalam menyusun rencana tindak lanjut bagi murid yang telah menyelesaikan program pendampingan khusus, aspek paling penting yang perlu diperhatikan Wali Asuh adalah...",
+   o:["Menyusun laporan akhir sebagai dokumentasi program","Memastikan keberlanjutan dukungan secara proporsional agar kemajuan murid tetap terjaga","Mengalihkan fokus pendampingan kepada murid lain yang membutuhkan","Mengevaluasi keberhasilan program secara menyeluruh sebagai bahan laporan","Menyampaikan hasil program kepada wali kelas terkait"],
+   a:1,p:"Keberlanjutan dukungan yang proporsional memastikan kemajuan murid tetap terjaga pasca program pendampingan khusus."},
+
+  {q:"Seorang murid yang sebelumnya pendiam mulai menunjukkan keterbukaan dan partisipasi aktif dalam kegiatan asrama. Sikap paling tepat yang ditunjukkan Wali Asuh dalam merespons perubahan ini adalah...",
+   o:["Mendorong murid untuk lebih sering tampil dalam kegiatan kelompok","Memberikan apresiasi yang tulus dan terus mendukung perkembangan positif murid secara konsisten","Mencatat perubahan tersebut sebagai bahan evaluasi bulanan","Menjadikan perubahan murid sebagai motivasi bagi murid lain","Memberikan tanggung jawab tambahan sesuai kemajuan yang ditunjukkan"],
+   a:1,p:"Apresiasi yang tulus dan dukungan konsisten memperkuat perkembangan positif yang telah ditunjukkan murid."},
+
+  {q:"Wali Asuh perlu menyusun strategi pengasuhan jangka panjang untuk murid dengan riwayat masalah perilaku kompleks. Pendekatan paling tepat yang harus diterapkan adalah...",
+   o:["Menyusun strategi berdasarkan pengalaman menangani kasus serupa sebelumnya","Menyusun strategi individual yang melibatkan berbagai pihak terkait dan dievaluasi secara berkala","Menetapkan target perubahan perilaku dalam jangka waktu tertentu","Melibatkan psikolog sekolah sejak awal penyusunan strategi","Menyesuaikan strategi berdasarkan respons murid terhadap pendampingan awal"],
+   a:1,p:"Strategi individual yang melibatkan berbagai pihak dan dievaluasi berkala lebih efektif menangani kasus perilaku yang kompleks."},
+],
+
+/* ============================
+   MANAJERIAL — 25 SOAL
+   ============================ */
+manajerial: [
+  {q:"Anda diminta menyelesaikan laporan keasramaan dalam waktu singkat, namun di saat bersamaan ada murid asuh yang membutuhkan pendampingan mendesak. Sikap yang paling tepat adalah...",
+   o:["Mengutamakan laporan karena ada tenggat waktu","Mendahulukan pendampingan murid karena menyangkut keselamatan/kondisi anak, lalu menyelesaikan laporan segera setelahnya","Menyuruh murid menunggu hingga laporan selesai","Mengabaikan kedua tugas dan meminta orang lain mengerjakan","Menunda laporan tanpa penjelasan ke atasan"],
+   a:1,p:"Prinsip manajerial mengutamakan skala prioritas berbasis dampak; keselamatan/kondisi anak lebih mendesak, namun laporan tetap diselesaikan dengan komunikasi yang jelas ke atasan."},
+
+  {q:"Rekan kerja Anda di asrama sering tidak menyelesaikan tugas tepat waktu sehingga membebani tim. Tindakan yang paling tepat sebagai bentuk kerja sama adalah...",
+   o:["Membicarakan di belakang ke rekan lain","Mengomunikasikan langsung secara konstruktif dan menawarkan bantuan penyelesaian","Mengambil alih seluruh tugasnya tanpa komunikasi","Melaporkan langsung ke atasan tanpa konfirmasi terlebih dahulu","Membiarkan saja karena bukan urusan Anda"],
+   a:1,p:"Kerja sama yang baik mengedepankan komunikasi langsung dan konstruktif sebelum eskalasi ke pihak lain."},
+
+  {q:"Anda mendapati instruksi atasan kurang sesuai dengan kondisi nyata di lapangan terkait jadwal kegiatan asrama. Sikap yang tepat adalah...",
+   o:["Tetap menjalankan tanpa menyampaikan masukan","Menyampaikan masukan secara santun disertai data/alasan, sambil tetap menghormati keputusan akhir atasan","Menolak instruksi secara terbuka di depan murid","Menjalankan instruksi setengah hati","Mengabaikan instruksi tanpa pemberitahuan"],
+   a:1,p:"Orientasi pelayanan dan integritas menuntut penyampaian masukan secara profesional, namun tetap menghormati garis komando."},
+
+  {q:"Sebagai bentuk integritas dalam bertugas, Wali Asuh yang menemukan dugaan penyalahgunaan fasilitas asrama oleh oknum pegawai sebaiknya...",
+   o:["Diam saja agar tidak menimbulkan konflik","Melaporkan melalui jalur yang sesuai dengan bukti yang dapat dipertanggungjawabkan","Menyebarkan informasi ke media sosial","Menegur secara terbuka di depan umum","Mengabaikan karena bukan tanggung jawabnya"],
+   a:1,p:"Integritas menuntut keberanian melaporkan pelanggaran melalui jalur resmi dan berbasis bukti, bukan menyebar opini."},
+
+  {q:"Target program pembinaan murid yang Anda susun tidak tercapai sesuai rencana akibat kendala di luar kendali Anda. Sikap orientasi hasil yang tepat adalah...",
+   o:["Menyalahkan keadaan dan berhenti berusaha","Mengevaluasi penyebab, menyesuaikan strategi, dan tetap berupaya mencapai hasil terbaik","Melaporkan kegagalan tanpa solusi","Mengabaikan target dan melanjutkan rutinitas seperti biasa","Menutupi kegagalan dari atasan"],
+   a:1,p:"Orientasi hasil mensyaratkan evaluasi dan adaptasi strategi, bukan menyerah pada kendala."},
+
+  {q:"Dalam rapat koordinasi keasramaan, pendapat Anda berbeda dengan mayoritas tim. Sikap komunikasi yang paling tepat adalah...",
+   o:["Memaksakan pendapat sampai diterima","Menyampaikan pendapat secara jelas dan terbuka untuk didiskusikan, lalu menerima keputusan bersama","Diam saja meski tidak setuju","Menyampaikan ketidaksetujuan di luar forum resmi","Keluar dari rapat sebagai bentuk protes"],
+   a:1,p:"Komunikasi efektif menekankan keterbukaan dalam forum resmi dan kesediaan menerima keputusan kolektif."},
+
+  {q:"Untuk meningkatkan kompetensi dalam pengasuhan anak, langkah pengembangan diri yang paling tepat dilakukan Wali Asuh adalah...",
+   o:["Menunggu pelatihan dari instansi tanpa inisiatif pribadi","Aktif mencari pengetahuan baru, mengikuti pelatihan, dan menerapkan hasil belajar dalam tugas sehari-hari","Mengandalkan pengalaman lama tanpa pembaruan","Hanya belajar jika diwajibkan","Mengabaikan perkembangan ilmu pengasuhan anak"],
+   a:1,p:"Pengembangan diri yang baik bersifat proaktif, bukan menunggu instruksi semata."},
+
+  {q:"Anda mendapati murid asuh memerlukan layanan yang berada di luar kewenangan Anda (misalnya konseling psikologis mendalam). Tindakan pelayanan publik yang tepat adalah...",
+   o:["Menangani sendiri meski di luar kompetensi","Mengarahkan dan mengoordinasikan ke pihak/layanan yang berwenang sambil tetap memberi dukungan awal","Mengabaikan kebutuhan murid","Menyuruh murid mencari bantuan sendiri","Menunda penanganan tanpa rujukan"],
+   a:1,p:"Pelayanan publik yang baik mencakup pengenalan batas kewenangan dan rujukan ke pihak kompeten."},
+
+  {q:"Ketika dihadapkan pada keputusan mendesak terkait keselamatan murid di tengah malam tanpa bisa menghubungi atasan, sikap pengambilan keputusan yang tepat adalah...",
+   o:["Menunggu sampai pagi untuk bertindak","Mengambil tindakan terbaik sesuai prosedur keselamatan yang ada, lalu segera melaporkan setelah situasi memungkinkan","Membiarkan situasi tanpa tindakan","Mendelegasikan ke murid lain","Mengabaikan karena bukan wewenangnya"],
+   a:1,p:"Kompetensi manajerial pengambilan keputusan menuntut respons cepat berbasis prosedur, dengan pelaporan setelahnya."},
+
+  {q:"Bagaimana sikap yang tepat saat menerima kritik dari atasan terkait cara kerja Anda di asrama?",
+   o:["Membela diri tanpa mendengarkan","Mendengarkan secara terbuka, merefleksikan, dan memperbaiki bila relevan","Mengabaikan kritik tersebut","Merasa tersinggung dan menurunkan kinerja","Membalas kritik dengan kritik balik"],
+   a:1,p:"Keterbukaan terhadap umpan balik adalah bagian dari kompetensi manajerial pengembangan diri."},
+
+  {q:"Anda diberi tanggung jawab tambahan mendampingi kegiatan ekstrakurikuler di luar jam tugas pokok. Sikap kerja sama tim yang tepat adalah...",
+   o:["Menolak karena bukan tugas utama","Menerima dengan profesional selama tidak mengganggu tugas pokok, atau mengomunikasikan kendala bila ada","Menerima tanpa mempertimbangkan beban kerja","Mengabaikan tanggung jawab tersebut","Melimpahkan ke rekan lain tanpa diskusi"],
+   a:1,p:"Fleksibilitas dan komunikasi proporsional mencerminkan kerja sama tim yang baik."},
+
+  {q:"Untuk membangun komunikasi efektif dengan murid asuh dari berbagai latar belakang ekonomi dan sosial, pendekatan terbaik adalah...",
+   o:["Menyamaratakan pendekatan tanpa melihat latar belakang individu","Memahami konteks dan kebutuhan masing-masing murid lalu menyesuaikan gaya komunikasi","Memberi perlakuan istimewa pada murid tertentu","Mengabaikan perbedaan latar belakang","Membatasi komunikasi pada hal administratif saja"],
+   a:1,p:"Komunikasi efektif dalam pengasuhan menuntut pemahaman kontekstual terhadap keberagaman murid."},
+
+  {q:"Pelayanan prima sebagai pegawai pemerintah dengan perjanjian kerja paling tepat dicerminkan melalui sikap...",
+   o:["Bekerja sesuai standar minimal yang ditentukan","Bekerja dengan sepenuh hati, responsif, dan berorientasi pada kepuasan serta kesejahteraan murid asuh","Mengutamakan kepentingan pribadi dalam bertugas","Bekerja hanya saat diawasi","Menjaga jarak emosional dengan murid"],
+   a:1,p:"Pelayanan publik yang prima menuntut dedikasi penuh dan orientasi pada kesejahteraan penerima layanan."},
+
+  {q:"Saat menghadapi konflik internal antarrekan Wali Asuh terkait pembagian tugas, langkah manajerial yang tepat adalah...",
+   o:["Memihak salah satu pihak","Memfasilitasi dialog terbuka untuk mencari solusi yang adil bagi semua pihak","Membiarkan konflik berlarut-larut","Melaporkan tanpa mencoba menyelesaikan terlebih dahulu","Mengambil alih semua tugas sendiri"],
+   a:1,p:"Pengelolaan konflik yang efektif mengutamakan fasilitasi dialog dan solusi yang adil."},
+
+  {q:"Anda menyadari bahwa metode pengasuhan yang selama ini diterapkan kurang efektif untuk sebagian murid. Sikap orientasi hasil yang tepat adalah...",
+   o:["Tetap menggunakan metode lama agar tidak repot","Mengevaluasi dan mencoba pendekatan baru yang lebih sesuai kebutuhan murid","Menyalahkan murid atas ketidakefektifan tersebut","Mengabaikan masalah tersebut","Melaporkan tanpa mencari solusi"],
+   a:1,p:"Orientasi hasil menuntut evaluasi berkelanjutan dan keberanian beradaptasi demi efektivitas pengasuhan."},
+
+  {q:"Manajemen waktu yang baik bagi Wali Asuh yang tinggal di asrama 24 jam ditunjukkan dengan...",
+   o:["Bekerja tanpa istirahat sepanjang waktu","Menyeimbangkan tugas pengasuhan, administrasi, dan waktu pemulihan pribadi secara terencana","Mengabaikan tugas administrasi demi istirahat","Mendelegasikan seluruh tugas ke rekan","Bekerja hanya pada jam dinas formal saja"],
+   a:1,p:"Manajemen waktu yang baik memastikan keseimbangan antara tugas profesional dan pemulihan diri, agar kinerja tetap optimal."},
+
+  {q:"Wali Asuh yang memiliki kompetensi manajerial tinggi ditunjukkan dengan kemampuan...",
+   o:["Hanya mematuhi instruksi tanpa inisiatif","Mengidentifikasi masalah, merencanakan solusi, mengeksekusi, dan mengevaluasi hasilnya secara mandiri dan bertanggung jawab","Menghindari tanggung jawab yang sulit","Selalu menunggu instruksi sebelum bertindak","Bekerja tanpa koordinasi dengan pihak lain"],
+   a:1,p:"Kompetensi manajerial mencakup siklus lengkap: identifikasi masalah, perencanaan, eksekusi, dan evaluasi secara mandiri."},
+
+  {q:"Dalam konteks akuntabilitas jabatan, Wali Asuh wajib...",
+   o:["Bertanggung jawab hanya secara lisan","Mampu mempertanggungjawabkan setiap keputusan dan tindakan dalam tugasnya kepada atasan dan pemangku kepentingan yang relevan","Menghindari dokumentasi agar tidak terikat","Menyerahkan pertanggungjawaban ke rekan","Hanya bertanggung jawab jika ada pengawasan"],
+   a:1,p:"Akuntabilitas jabatan berarti kemampuan mempertanggungjawabkan setiap tindakan dan keputusan secara tertulis dan dapat diverifikasi."},
+
+  {q:"Ketika program yang Anda jalankan berhasil dengan baik, sikap manajerial yang tepat adalah...",
+   o:["Mengklaim seluruh keberhasilan sebagai hasil kerja pribadi","Mendokumentasikan keberhasilan, mengidentifikasi faktor pendorong, dan berbagi praktik baik dengan rekan tim","Merahasiakan keberhasilan agar tidak ditiru","Mengabaikan keberhasilan dan langsung ke program berikutnya","Melaporkan keberhasilan secara berlebihan ke media"],
+   a:1,p:"Berbagi praktik baik (sharing best practices) adalah kontribusi manajerial yang membangun kapasitas tim secara keseluruhan."},
+
+  {q:"Seorang Wali Asuh yang baru bertugas merasa kewalahan dengan banyaknya tuntutan pekerjaan. Sikap yang paling profesional adalah...",
+   o:["Mengeluh terus menerus kepada rekan","Mengomunikasikan kondisi ke atasan secara konstruktif, meminta bimbingan, dan menyusun prioritas tugas bersama","Berpura-pura mampu menangani semua tanpa minta bantuan","Mengundurkan diri dari jabatan","Mengabaikan sebagian tugas tanpa komunikasi"],
+   a:1,p:"Komunikasi terbuka dengan atasan dan manajemen prioritas adalah respons profesional terhadap tantangan pekerjaan."},
+
+  {q:"Kemampuan mengelola stres dalam tugas Wali Asuh yang intensif penting karena...",
+   o:["Agar terkesan tegar di depan murid saja","Stres yang tidak dikelola memengaruhi kualitas pengasuhan dan berpotensi merugikan murid","Untuk mematuhi aturan ASN","Agar tidak dibebani tugas tambahan","Karena sudah menjadi syarat dalam SK jabatan"],
+   a:1,p:"Kesejahteraan Wali Asuh (caregiver wellbeing) langsung berdampak pada kualitas pengasuhan yang diterima murid."},
+
+  {q:"Bentuk integritas Wali Asuh yang paling mendasar dalam keseharian adalah...",
+   o:["Tidak pernah terlambat hadir saja","Konsistensi antara ucapan dan tindakan, serta menjaga kepercayaan murid, orang tua, dan institusi","Memberikan laporan yang baik meski tidak sesuai fakta","Menghindari konflik dengan cara apapun","Selalu setuju dengan pendapat atasan"],
+   a:1,p:"Integritas adalah konsistensi antara nilai, ucapan, dan tindakan dalam setiap situasi, bukan hanya kepatuhan formal."},
+
+  {q:"Dalam mengembangkan kompetensi pengasuhan, sumber belajar yang paling relevan bagi Wali Asuh adalah...",
+   o:["Hanya buku teks akademik formal","Pelatihan pengasuhan anak, jurnal perkembangan anak, mentoring dari Wali Asuh senior, dan refleksi pengalaman langsung","Hanya video hiburan","Pendapat teman tanpa basis ilmiah","Hanya instruksi tertulis dari atasan"],
+   a:1,p:"Pengembangan kompetensi yang efektif memadukan teori, praktik, refleksi, dan pembelajaran dari sesama profesional."},
+
+  {q:"Ketika Wali Asuh mendapat informasi baru tentang metode pengasuhan yang lebih baik melalui pelatihan, tindakan yang tepat selanjutnya adalah...",
+   o:["Menyimpan informasi tersebut untuk diri sendiri","Menerapkan metode baru secara bertahap, mengevaluasi hasilnya, dan berbagi dengan rekan bila terbukti efektif","Mengganti seluruh metode lama sekaligus tanpa transisi","Mengabaikan karena metode lama sudah terbiasa","Menunggu instruksi atasan sebelum menerapkan apapun"],
+   a:1,p:"Transfer pembelajaran dari pelatihan membutuhkan penerapan bertahap, evaluasi, dan berbagi pengetahuan untuk manfaat yang optimal."},
+
+  {q:"Pelayanan publik yang berkeadilan dari Wali Asuh berarti...",
+   o:["Memberikan layanan identik kepada semua murid tanpa mempertimbangkan kebutuhan","Memberikan layanan yang setara namun terdiferensiasi sesuai kebutuhan masing-masing murid","Memprioritaskan murid yang lebih mudah ditangani","Mengabaikan murid dengan kebutuhan kompleks","Hanya melayani murid yang aktif meminta"],
+   a:1,p:"Keadilan dalam pelayanan bukan berarti kesamaan persis, melainkan responsivitas terhadap kebutuhan unik masing-masing individu."}
+],
+
+/* ============================
+   SOSIAL KULTURAL — 20 SOAL
+   ============================ */
+sosial: [
+  {q:"Anda bertugas di Sekolah Rakyat dengan murid dari berbagai suku dan agama. Saat ada perayaan hari besar keagamaan salah satu murid, sikap Anda yang tepat adalah...",
+   o:["Mengabaikan karena bukan kepercayaan Anda","Mendukung dan memfasilitasi murid menjalankan ibadah sesuai keyakinannya selama tidak mengganggu kegiatan asrama","Melarang perayaan tersebut di asrama","Hanya mendukung jika sesuai keyakinan mayoritas","Membiarkan tanpa fasilitasi apa pun"],
+   a:1,p:"Kompetensi sosio kultural menuntut sikap menghargai dan memfasilitasi keberagaman keyakinan murid."},
+
+  {q:"Anda berasal dari luar daerah dan belum memahami bahasa daerah setempat sehingga pegawai lain sungkan mengobrol dengan Anda. Sikap terbaik adalah...",
+   o:["Bersikap santai meski merasa tidak nyaman","Berusaha mempelajari bahasa/budaya setempat secara bertahap agar lebih luwes bergaul sambil tetap menggunakan Bahasa Indonesia yang baik","Menarik diri dari pergaulan","Menuntut rekan kerja menyesuaikan dengan Anda","Mengabaikan situasi tersebut"],
+   a:1,p:"Adaptasi budaya yang proaktif sambil tetap profesional adalah sikap sosio kultural yang dianjurkan."},
+
+  {q:"Tetua adat mengundang Anda menghadiri upacara adat dan menyajikan hidangan yang kurang sesuai selera Anda. Sikap paling tepat adalah...",
+   o:["Menolak makan secara terang-terangan","Menghormati tradisi dengan mencicipi secukupnya atau menyampaikan dengan sopan bila ada pantangan tertentu","Tidak datang ke acara tersebut","Mengeluh kepada tuan rumah","Membawa makanan sendiri tanpa pemberitahuan"],
+   a:1,p:"Menghormati tradisi lokal sambil tetap menjaga kesopanan adalah inti kompetensi sosio kultural."},
+
+  {q:"Murid asuh Anda berasal dari daerah konflik dan cenderung tertutup terhadap teman dari kelompok berbeda. Pendekatan sosio kultural yang tepat adalah...",
+   o:["Membiarkan murid memilih sendiri pergaulannya tanpa intervensi","Secara bertahap memfasilitasi interaksi positif antar kelompok untuk membangun toleransi dan kerukunan","Memaksa murid berbaur secara instan","Memisahkan murid dari kelompok berbeda untuk menghindari konflik","Mengabaikan latar belakang tersebut sepenuhnya"],
+   a:1,p:"Pembinaan toleransi dilakukan secara bertahap dan suportif, bukan instan maupun segregatif."},
+
+  {q:"Saat rapat wali murid yang dihadiri orang tua dengan latar pendidikan beragam, cara berkomunikasi yang paling tepat adalah...",
+   o:["Menggunakan istilah teknis pendidikan agar terlihat profesional","Menggunakan bahasa yang sederhana dan mudah dipahami oleh semua kalangan","Hanya berkomunikasi dengan orang tua berpendidikan tinggi","Menyerahkan komunikasi sepenuhnya ke pihak lain","Membatasi interaksi seminimal mungkin"],
+   a:1,p:"Komunikasi sosio kultural yang efektif mempertimbangkan keberagaman latar belakang audiens."},
+
+  {q:"Anda mendapati rekan kerja menjadikan latar belakang ekonomi murid sebagai bahan candaan. Sikap yang tepat adalah...",
+   o:["Ikut tertawa agar tidak dianggap kaku","Menegur secara baik dan mengingatkan pentingnya menjaga martabat setiap murid","Diam saja karena bukan urusan Anda","Melaporkan tanpa menegur langsung terlebih dahulu","Membenarkan tindakan tersebut"],
+   a:1,p:"Menjaga martabat dan kesetaraan murid dari berbagai latar belakang adalah bagian dari kepekaan sosio kultural."},
+
+  {q:"Murid asuh Anda menjalankan ibadah pada waktu yang bersamaan dengan jadwal kegiatan asrama. Sikap terbaik Wali Asuh adalah...",
+   o:["Mewajibkan murid mengikuti jadwal asrama tanpa pengecualian","Mengatur penjadwalan yang akomodatif agar murid tetap dapat menjalankan ibadahnya","Melarang ibadah selama jam kegiatan","Mengabaikan kebutuhan ibadah murid","Menyuruh murid memilih salah satu"],
+   a:1,p:"Akomodasi kebutuhan ibadah murid mencerminkan penghormatan terhadap keberagaman dan hak beragama."},
+
+  {q:"Dalam kegiatan makan bersama di asrama, ada murid dengan pantangan makanan tertentu karena keyakinan agama. Sikap Wali Asuh yang tepat adalah...",
+   o:["Mengabaikan karena merepotkan dapur asrama","Berkoordinasi dengan pihak dapur untuk menyediakan alternatif sesuai kebutuhan murid","Memaksa murid mengonsumsi makanan yang disediakan","Menegur murid agar tidak terlalu memilih","Membiarkan murid tidak makan"],
+   a:1,p:"Akomodasi kebutuhan pangan sesuai keyakinan adalah bentuk kepekaan sosio kultural dalam layanan pengasuhan."},
+
+  {q:"Anda ditugaskan di daerah dengan adat istiadat yang berbeda jauh dari kebiasaan asal Anda. Sikap profesional yang tepat adalah...",
+   o:["Menerapkan kebiasaan asal Anda di lingkungan baru","Mempelajari dan menyesuaikan diri dengan adat setempat selama tidak bertentangan dengan nilai dan tugas kedinasan","Menolak beradaptasi karena merasa cara lama lebih baik","Mengisolasi diri dari masyarakat sekitar","Mengkritik adat setempat secara terbuka"],
+   a:1,p:"Adaptasi budaya yang selektif dan tetap menjaga profesionalisme adalah respons sosio kultural yang ideal."},
+
+  {q:"Murid asuh Anda berbicara dengan dialek atau logat daerah yang kadang membuat murid lain menertawakannya. Tindakan Wali Asuh yang tepat adalah...",
+   o:["Membiarkan karena dianggap candaan wajar","Menegur perilaku menertawakan dan menanamkan nilai saling menghargai keberagaman bahasa","Menyuruh murid mengubah cara bicaranya","Mengabaikan situasi tersebut","Memarahi murid yang ditertawakan"],
+   a:1,p:"Wali Asuh berperan menumbuhkan sikap saling menghargai keberagaman, termasuk dialek dan logat bahasa daerah."},
+
+  {q:"Ketika berhadapan dengan wali murid yang menyampaikan keluhan dengan nada emosional karena perbedaan cara pandang budaya, sikap terbaik Wali Asuh adalah...",
+   o:["Membalas dengan nada yang sama","Tetap tenang, mendengarkan dengan empati, dan mencari solusi bersama secara santun","Mengabaikan keluhan tersebut","Menyalahkan wali murid","Menghindari pertemuan lanjutan"],
+   a:1,p:"Kepekaan sosio kultural mencakup kemampuan meredam ketegangan lintas budaya dengan empati dan komunikasi santun."},
+
+  {q:"Sikap yang paling mencerminkan nilai kebhinekaan dalam tugas sehari-hari Wali Asuh adalah...",
+   o:["Menyamaratakan seluruh murid tanpa mengenali keunikan masing-masing","Menghargai perbedaan latar belakang murid sambil tetap memperlakukan semua secara adil dan setara","Memberi perhatian lebih hanya pada murid dari daerah asal yang sama","Mengabaikan perbedaan demi kepraktisan","Memisahkan murid berdasarkan suku dalam kegiatan"],
+   a:1,p:"Nilai kebhinekaan diwujudkan melalui penghargaan terhadap perbedaan sekaligus perlakuan yang adil dan setara."},
+
+  {q:"Anda mendapati murid asuh dari etnis tertentu diperlakukan berbeda oleh teman-temannya. Tindakan yang tepat adalah...",
+   o:["Mengabaikan karena murid bisa menyelesaikan sendiri","Menegur perilaku diskriminatif, mendampingi murid yang diperlakukan berbeda, dan melakukan pembinaan nilai kebersamaan","Memindahkan murid ke kamar lain","Membiarkan waktu yang menyelesaikan","Menyuruh murid dari etnis tersebut menyesuaikan diri"],
+   a:1,p:"Diskriminasi berbasis etnis harus ditangani secara langsung dengan tegur, dampingi, dan bina nilai kebersamaan."},
+
+  {q:"Program kegiatan asrama yang paling mencerminkan penghargaan terhadap keberagaman budaya murid adalah...",
+   o:["Kegiatan yang hanya menonjolkan budaya mayoritas","Kegiatan yang memberikan ruang bagi murid dari berbagai latar belakang untuk saling mengenal dan menghargai budaya masing-masing","Kegiatan seragam tanpa memperhatikan keberagaman","Menghilangkan semua unsur budaya daerah dalam kegiatan asrama","Kegiatan budaya yang hanya melibatkan pegawai"],
+   a:1,p:"Program yang inklusif memberikan ruang bagi setiap budaya untuk dikenal dan dihargai secara setara."},
+
+  {q:"Wali Asuh yang baru bertugas menghadapi murid dari budaya yang memiliki tradisi komunikasi sangat berbeda (misalnya menghindari kontak mata sebagai tanda hormat). Sikap yang tepat adalah...",
+   o:["Menganggap murid tidak sopan karena tidak melihat mata saat berbicara","Mencari tahu konteks budaya murid sebelum membuat penilaian, lalu menyesuaikan pendekatan komunikasi","Memaksa murid mengubah cara berkomunikasinya","Mengabaikan perbedaan tersebut","Melaporkan murid ke Wali Asrama karena tidak sopan"],
+   a:1,p:"Sensitivitas budaya dimulai dari kemauan mencari tahu konteks sebelum menghakimi perilaku yang terlihat berbeda."},
+
+  {q:"Dalam situasi murid asuh dari berbagai agama merayakan hari raya yang berbeda-beda sepanjang tahun, pendekatan terbaik Wali Asuh adalah...",
+   o:["Hanya merayakan hari raya agama mayoritas","Memfasilitasi dan memberikan perhatian yang setara pada perayaan setiap hari raya murid","Melarang semua perayaan hari raya di asrama","Membiarkan murid merayakan sendiri tanpa dukungan","Hanya merayakan hari raya nasional"],
+   a:1,p:"Perhatian setara terhadap perayaan hari raya semua agama murid mencerminkan implementasi nilai kebhinekaan yang nyata."},
+
+  {q:"Wali Asuh mendapati ada murid yang minder karena latar belakang ekonominya jauh lebih rendah dibanding teman asuhnya. Pendekatan sosio kultural yang tepat adalah...",
+   o:["Mengabaikan karena murid akan terbiasa dengan sendirinya","Membantu murid membangun harga diri yang positif dengan fokus pada potensi dan pencapaiannya, serta menciptakan iklim asrama yang tidak membeda-bedakan status ekonomi","Menasihati murid agar tidak membandingkan diri","Menceritakan kisah murid ke teman lain agar lebih memahami","Memisahkan murid berdasarkan latar belakang ekonomi"],
+   a:1,p:"Membangun harga diri murid dan menciptakan iklim inklusif adalah respons sosio kultural terhadap stigma ekonomi."},
+
+  {q:"Seorang murid asuh menolak berdoa bersama dalam acara asrama karena berbeda keyakinan. Sikap Wali Asuh yang tepat adalah...",
+   o:["Memaksa murid ikut berdoa bersama","Menghormati pilihan murid, memberikan ruang alternative yang bermartabat, dan memastikan murid tetap merasa diterima","Menegur murid di depan umum","Melaporkan murid ke orang tuanya","Mengeluarkan murid dari kegiatan"],
+   a:1,p:"Menghormati hak beragama murid sambil tetap menjaga inklusivitas adalah prinsip sosio kultural yang harus dijaga."},
+
+  {q:"Kompetensi sosio kultural dalam konteks ASN paling tepat dimaknai sebagai...",
+   o:["Kemampuan berbicara dalam berbagai bahasa daerah","Kepekaan dan kemampuan bekerja secara efektif di tengah keberagaman budaya, agama, suku, dan latar belakang sosial masyarakat","Pengetahuan hafalan tentang budaya daerah seluruh Indonesia","Kemampuan melaksanakan upacara adat","Kemampuan membuat laporan tentang keberagaman"],
+   a:1,p:"Kompetensi sosio kultural ASN adalah kepekaan dan efektivitas kerja dalam konteks keberagaman, bukan sekadar pengetahuan hafalan."},
+
+  {q:"Pendekatan yang paling tepat ketika Wali Asuh harus menangani konflik yang dipicu oleh perbedaan nilai budaya antarmurid adalah...",
+   o:["Memaksakan satu nilai budaya sebagai standar bersama","Memfasilitasi dialog yang menghargai perspektif masing-masing budaya dan mencari titik temu yang dapat diterima semua pihak","Mengabaikan perbedaan budaya sebagai penyebab","Memisahkan murid berdasarkan budaya masing-masing","Meminta murid melupakan budaya asalnya"],
+   a:1,p:"Dialog lintas budaya yang menghargai perspektif masing-masing dan mencari titik temu adalah pendekatan resolusi konflik berbasis sosio kultural yang ideal."}
+],
+
+/* ============================
+   WAWANCARA — 10 SOAL
+   ============================ */
+wawancara: [
+  {q:"Pewawancara bertanya: 'Apa motivasi utama Anda melamar sebagai Wali Asuh di Sekolah Rakyat?' Jawaban yang paling tepat mencerminkan kesiapan dan integritas adalah...",
+   o:["Karena gaji PPPK lebih stabil dibanding pekerjaan sebelumnya","Karena ingin berkontribusi langsung dalam pendampingan dan pembentukan karakter anak dari keluarga kurang mampu, sesuai panggilan untuk melayani","Karena tidak ada pilihan pekerjaan lain","Karena ingin mendapatkan status PNS di kemudian hari","Karena diminta oleh keluarga"],
+   a:1,p:"Jawaban wawancara idealnya menonjolkan motivasi pelayanan dan kesesuaian nilai pribadi dengan misi Sekolah Rakyat, bukan semata orientasi finansial/status."},
+
+  {q:"Pewawancara menanyakan kesiapan Anda untuk tinggal menetap di asrama selama masa penugasan. Jawaban yang tepat adalah...",
+   o:["Menyatakan kesiapan namun mengajukan syarat fasilitas tertentu sebagai prasyarat mutlak","Menyatakan kesiapan penuh karena memahami bahwa domisili di asrama adalah bagian penting dari tugas pengasuhan 24 jam","Menyatakan ketidaksiapan namun tetap melamar","Meminta waktu pertimbangan lebih lanjut","Menjawab tidak yakin"],
+   a:1,p:"Kesediaan tinggal di asrama adalah syarat mutlak; jawaban terbaik menunjukkan pemahaman dan kesiapan tulus, bukan syarat tambahan."},
+
+  {q:"Saat ditanya 'Bagaimana Anda menangani situasi sulit saat murid asuh menolak nasihat Anda?', jawaban yang paling baik adalah...",
+   o:["Memaksa murid mengikuti nasihat dengan tegas tanpa kompromi","Mendekati murid secara personal, memahami akar penolakannya, lalu membangun komunikasi dua arah hingga murid lebih terbuka","Membiarkan murid tanpa tindak lanjut","Melibatkan hukuman agar murid patuh","Melimpahkan masalah ke rekan lain"],
+   a:1,p:"Pendekatan personal dan komunikasi dua arah mencerminkan kompetensi pengasuhan yang humanis."},
+
+  {q:"Pertanyaan: 'Ceritakan pengalaman Anda bekerja dalam tim yang memiliki perbedaan pendapat.' Jawaban yang ideal menunjukkan...",
+   o:["Anda selalu benar dan rekan lain yang salah","Kemampuan mendengarkan, berdiskusi terbuka, dan mencari titik temu demi tujuan bersama","Anda menghindari konflik dengan diam total","Anda melaporkan rekan ke atasan setiap ada perbedaan","Anda bekerja sendiri tanpa melibatkan tim"],
+   a:1,p:"Jawaban wawancara yang baik menonjolkan kemampuan kolaborasi dan resolusi konflik secara konstruktif."},
+
+  {q:"Ketika ditanya kelemahan diri dalam wawancara, jawaban yang paling tepat dan profesional adalah...",
+   o:["Menyatakan tidak memiliki kelemahan sama sekali","Mengakui kelemahan secara jujur disertai upaya konkret yang sudah/sedang dilakukan untuk memperbaikinya","Menyebutkan kelemahan yang tidak relevan dengan pekerjaan","Menjawab dengan kelemahan orang lain","Menolak menjawab pertanyaan tersebut"],
+   a:1,p:"Kejujuran disertai bukti perbaikan diri menunjukkan kematangan dan kesadaran diri yang dihargai dalam wawancara."},
+
+  {q:"Pertanyaan: 'Bagaimana Anda akan menjaga netralitas dalam mengasuh murid dari berbagai latar belakang agama dan suku?' Jawaban terbaik adalah...",
+   o:["Memprioritaskan murid dengan latar belakang yang sama dengan Anda","Memperlakukan seluruh murid secara adil dan setara tanpa membedakan latar belakang, sambil tetap menghormati keberagaman mereka","Menghindari topik agama dan suku sepenuhnya","Menyamaratakan semua murid tanpa mengenali kebutuhan individu","Menyerahkan urusan tersebut ke pihak lain"],
+   a:1,p:"Netralitas dan keadilan disertai penghormatan terhadap keberagaman adalah jawaban yang selaras dengan nilai sosio kultural ASN."},
+
+  {q:"Saat ditanya rencana jangka panjang Anda jika diterima sebagai Wali Asuh, jawaban yang paling tepat adalah...",
+   o:["Menjadikan posisi ini sebagai batu loncatan ke profesi lain dalam waktu dekat","Berkomitmen mengembangkan diri dan berkontribusi optimal dalam jangka panjang demi keberlangsungan program Sekolah Rakyat","Belum memiliki rencana apa pun","Berencana resign begitu ada kesempatan lebih baik","Menjawab sekadarnya tanpa visi jelas"],
+   a:1,p:"Menunjukkan komitmen jangka panjang dan keselarasan visi dengan misi instansi adalah jawaban yang dinilai positif."},
+
+  {q:"Pewawancara bertanya bagaimana Anda menjaga integritas saat tidak ada pengawasan langsung di asrama pada malam hari. Jawaban terbaik adalah...",
+   o:["Mengandalkan pengawasan kamera semata","Tetap menjalankan tugas dan tanggung jawab sepenuhnya karena menyadari keselamatan murid adalah prioritas utama, terlepas dari ada/tidaknya pengawasan","Mengurangi kewaspadaan karena tidak ada yang mengawasi","Hanya bertugas sesuai jam yang ditentukan secara kaku","Menyerahkan tanggung jawab malam ke rekan lain sepenuhnya"],
+   a:1,p:"Integritas tercermin dari konsistensi kinerja terlepas dari ada atau tidaknya pengawasan, terlebih menyangkut keselamatan anak."},
+
+  {q:"Saat pewawancara bertanya: 'Apa yang Anda ketahui tentang program Sekolah Rakyat?', jawaban terbaik adalah...",
+   o:["Tidak tahu banyak, tapi siap belajar","Sekolah Rakyat adalah program Kemensos yang menyediakan pendidikan berasrama bagi anak dari keluarga miskin ekstrem, bertujuan memutus rantai kemiskinan antargenerasi melalui pendidikan holistik berbasis karakter","Program pemerintah untuk anak yatim piatu","Program bantuan sosial berupa uang tunai","Program beasiswa bagi siswa berprestasi"],
+   a:1,p:"Pemahaman mendalam tentang program yang dilamar menunjukkan kesungguhan, persiapan, dan kesiapan pelamar."},
+
+  {q:"Ketika pewawancara menanyakan bagaimana cara Anda menghadapi murid yang mengalami krisis emosional berat (menangis tak terkendali, menarik diri), jawaban yang paling tepat adalah...",
+   o:["Menyuruh murid berhenti menangis dan bersikap tegar","Hadir dengan tenang di sisi murid, berikan ruang untuk mengekspresikan perasaan, dengarkan tanpa menghakimi, dan koordinasikan penanganan lanjut bila diperlukan","Mengabaikan murid hingga tenang sendiri","Langsung memanggil orang tua tanpa pendampingan awal","Memberikan ceramah motivasi agar murid bangkit"],
+   a:1,p:"Respons krisis emosional yang tepat: hadir, dengarkan, berikan ruang aman, dan koordinasikan penanganan — bukan menekan atau mengabaikan."}
+]
+
+}; // end bank
+
+/* =====================================================================
+   ASSEMBLY & LOGIC
+   ===================================================================== */
+
+const order = [
+  {key:"teknis",    label:"TEKNIS"},
+  {key:"manajerial",label:"MANAJERIAL"},
+  {key:"sosial",    label:"SOSIAL KULTURAL"},
+  {key:"wawancara", label:"WAWANCARA"}
+];
+
+let questions = [];
+order.forEach(sec=>{
+  bank[sec.key].forEach(item=>{
+    questions.push({...item, kategori:sec.label, kategoriKey:sec.key});
+  });
+});
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let ragu    = new Array(questions.length).fill(false);
+// 2 jam 10 menit = 7800 detik
+let timeLeft = 7800;
+let timerId  = null;
+
+function startTest(){
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('testScreen').classList.remove('hidden');
+  buildNavGrid();
+  buildSesiTabs();
+  renderQuestion();
+  timerId = setInterval(tick, 1000);
+}
+
+function formatTime(s){
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sc = s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0');
+}
+
+function tick(){
+  timeLeft--;
+  if(timeLeft<=0){ timeLeft=0; clearInterval(timerId); finishTest(); return; }
+  const el = document.getElementById('timer');
+  el.textContent = formatTime(timeLeft);
+  if(timeLeft<300) el.classList.add('warn');
+}
+
+function buildSesiTabs(){
+  const c = document.getElementById('sesiTabs');
+  c.innerHTML = '';
+  order.forEach(sec=>{
+    const b = document.createElement('button');
+    b.textContent = sec.label;
+    b.onclick = ()=>{ current = questions.findIndex(q=>q.kategoriKey===sec.key); renderQuestion(); };
+    c.appendChild(b);
+  });
+}
+
+function buildNavGrid(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  questions.forEach((q,i)=>{
+    const d = document.createElement('div');
+    d.textContent = i+1;
+    d.id = 'navitem-'+i;
+    d.onclick = ()=>{ current=i; renderQuestion(); };
+    grid.appendChild(d);
+  });
+}
+
+function updateNavGrid(){
+  questions.forEach((q,i)=>{
+    const d = document.getElementById('navitem-'+i);
+    d.className = '';
+    if(i===current) d.classList.add('active');
+    if(ragu[i]) d.classList.add('ragu');
+    else if(answers[i]!==null) d.classList.add('answered');
+  });
+  const activeEl = document.getElementById('navitem-'+current);
+  if(activeEl) activeEl.scrollIntoView({block:'nearest',behavior:'smooth'});
+  document.querySelectorAll('.sesi-tabs button').forEach((b,i)=>{
+    b.classList.toggle('active', order[i].key===questions[current].kategoriKey);
+  });
+  // update ragu button label
+  const btnR = document.getElementById('btnRagu');
+  if(btnR) btnR.style.opacity = ragu[current] ? '1' : '.75';
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById('soalLabel').textContent = 'SOAL NO. '+(current+1)+' / '+questions.length;
+  document.getElementById('kategoriLabel').textContent = q.kategori;
+  document.getElementById('soalText').textContent = q.q;
+  const huruf = ['A','B','C','D','E'];
+  const cont = document.getElementById('opsiContainer');
+  cont.innerHTML = '';
+  q.o.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opsi'+(answers[current]===i?' selected':'');
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavGrid(); };
+    div.innerHTML = `<div class="huruf">${huruf[i]}</div><div class="opsi-text">${opt}</div>`;
+    cont.appendChild(div);
+  });
+  document.getElementById('btnPrev').disabled = current===0;
+  updateNavGrid();
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<questions.length-1){ current++; renderQuestion(); } else { confirmFinish(); } }
+function toggleRagu(){ ragu[current]=!ragu[current]; updateNavGrid(); }
+
+function confirmFinish(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    if(!confirm(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan?`)) return;
+  }
+  finishTest();
+}
+
+function finishTest(){
+  clearInterval(timerId);
+  document.getElementById('testScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+  showResults();
+}
+
+function showResults(){
+  const catScores = {};
+  order.forEach(sec=> catScores[sec.key]={correct:0,total:0});
+  let totalCorrect=0;
+  questions.forEach((q,i)=>{
+    catScores[q.kategoriKey].total++;
+    if(answers[i]===q.a){ catScores[q.kategoriKey].correct++; totalCorrect++; }
+  });
+
+  const scoreCard = document.getElementById('scoreCard');
+  scoreCard.innerHTML='';
+
+  // Overall
+  const pctOverall = Math.round(totalCorrect/questions.length*100);
+  const overall = document.createElement('div');
+  overall.className='score-box';
+  overall.style.gridColumn='1/-1';
+  overall.innerHTML=`<h3>Skor Keseluruhan</h3><div class="num">${totalCorrect} / ${questions.length}</div><div class="pct">${pctOverall}%</div>`;
+  scoreCard.appendChild(overall);
+
+  order.forEach(sec=>{
+    const s=catScores[sec.key];
+    const pct=Math.round(s.correct/s.total*100);
+    const box=document.createElement('div');
+    box.className='score-box';
+    box.innerHTML=`<h3>${sec.label}</h3><div class="num">${s.correct} / ${s.total}</div><div class="pct">${pct}%</div>`;
+    scoreCard.appendChild(box);
+  });
+
+  const huruf=['A','B','C','D','E'];
+  const reviewList=document.getElementById('reviewList');
+  reviewList.innerHTML='';
+  questions.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className='review-item';
+    let tagClass='kosong',tagText='Kosong';
+    if(answers[i]!==null){
+      tagClass=answers[i]===q.a?'benar':'salah';
+      tagText=answers[i]===q.a?'Benar':'Salah';
+    }
+    div.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <b>No. ${i+1} — ${q.kategori}</b>
+        <span class="tag ${tagClass}">${tagText}</span>
+      </div>
+      <p style="margin:8px 0;font-size:14px;">${q.q}</p>
+      <div style="font-size:13px;color:#555;margin-bottom:4px;">Jawaban Anda: ${answers[i]!==null?huruf[answers[i]]+'. '+q.o[answers[i]]:'(tidak dijawab)'}</div>
+      <div style="font-size:13px;color:var(--green);font-weight:bold;margin-bottom:6px;">Kunci: ${huruf[q.a]}. ${q.o[q.a]}</div>
+      <div class="pembahasan">${q.p}</div>
+    `;
+    reviewList.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>
